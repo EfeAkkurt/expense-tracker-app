@@ -55,10 +55,10 @@ const Welcome = () => {
               .damping(17)}
             style={{ alignItems: "center", gap: 2 }}
           >
-            <Typo size={17} color={Colors.textLight}>
+            <Typo size={17} color={colors.textLight}>
               finances must be arranged to set a better
             </Typo>
-            <Typo size={17} color={Colors.textLight}>
+            <Typo size={17} color={colors.textLight}>
               lifestyle in future
             </Typo>
           </Animated.View>

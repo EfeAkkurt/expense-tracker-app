@@ -9,8 +9,15 @@ import Input from "@/components/Input";
 import * as Icons from "phosphor-react-native";
 import Button from "@/components/Button";
 import { useRouter } from "expo-router";
+import { useAuth } from "@/contexts/authContexts";
 
 const Register = () => {
+  // STATES
+  const [isLoading, setIsLoading] = useState(false);
+  const router = useRouter();
+
+  const { register: registerUser } = useAuth();
+
   {
     /* REFERENCES */
   }
@@ -26,14 +33,18 @@ const Register = () => {
       Alert.alert("Sign Up", "Please fill al the fields");
       return;
     }
-    console.log("Name: ", nameRef.current);
-    console.log("Email: ", emailRef.current);
-    console.log("Password: ", passwordRef.current);
-    console.log("good to go");
+    setIsLoading(true);
+    const res = await registerUser(
+      emailRef.current,
+      nameRef.current,
+      passwordRef.current
+    );
+    setIsLoading(false);
+    console.log("register result: ", res);
+    if (!res.success) {
+      Alert.alert("Sign Up", res.msg);
+    }
   };
-
-  const [isLoading, setIsLoading] = useState(false);
-  const router = useRouter();
 
   return (
     <ScreenWrapper>
