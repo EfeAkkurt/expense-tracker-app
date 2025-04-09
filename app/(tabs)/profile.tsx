@@ -1,13 +1,98 @@
-import { StyleSheet, Text, View } from "react-native";
+import { StyleSheet, Text, TouchableOpacity, View } from "react-native";
 import React from "react";
 import ScreenWrapper from "@/components/ScreenWrapper";
 import { colors, radius, spacingX, spacingY } from "@/constants/theme";
 import { verticalScale } from "@/utils/styling";
+import Header from "@/components/Header";
+import BackButton from "@/components/BackButton";
+import Typo from "@/components/typo";
+import { useAuth } from "@/contexts/authContexts";
+import { Image } from "expo-image";
+import { getProfileImage } from "@/services/imageServices";
+import { accountOptionType } from "@/types";
+import * as Icons from "phosphor-react-native";
 
 const Profile = () => {
+  const { user } = useAuth();
+
+  const accountOptions: accountOptionType[] = [
+    {
+      title: "Edit Profile",
+      icon: <Icons.User size={26} color={colors.white} weight="fill" />,
+      routeName: "/(modals)/profileModal",
+      bgColor: "#6366f1",
+    },
+    {
+      title: "Settings",
+      icon: <Icons.GearSix size={26} color={colors.white} weight="fill" />,
+      //routeName: "/(modals)/profileModal",
+      bgColor: "#059669",
+    },
+    {
+      title: "Privacy Policy",
+      icon: <Icons.Lock size={26} color={colors.white} weight="fill" />,
+      //routeName: "/(modals)/profileModal",
+      bgColor: colors.neutral800,
+    },
+    {
+      title: "Logout",
+      icon: <Icons.Power size={26} color={colors.white} weight="fill" />,
+      //routeName: "/(modals)/profileModal",
+      bgColor: "#e11d48",
+    },
+  ];
+
   return (
     <ScreenWrapper>
-      <Text>Profile</Text>
+      <View style={styles.container}>
+        {/* HEADER */}
+        <Header title="Profile" style={{ marginVertical: spacingY._10 }} />
+        {/*USER INFO*/}
+        <View style={styles.userInfo}>
+          {/*AVATAR*/}
+          <View>
+            {/*USER IMAGE*/}
+            <Image
+              source={getProfileImage(user?.image)}
+              style={styles.avatar}
+              contentFit="cover"
+              transition={100}
+            />{" "}
+          </View>
+          {/*NAME & EMAIL*/}
+          <View style={styles.nameContainer}>
+            <Typo size={24} fontWeight={"600"} color={colors.neutral100}>
+              {user?.name}
+            </Typo>
+
+            <Typo size={15} color={colors.neutral400}>
+              {user?.email}
+            </Typo>
+          </View>
+        </View>
+        {/*ACCOUNT OPTIONS*/}
+        <View style={styles.accountOptions}>
+          {accountOptions.map((item, index) => {
+            return (
+              <View style={styles.listItem}>
+                <TouchableOpacity style={styles.flexRow}>
+                  {/*ICON*/}
+                  <View
+                    style={[
+                      styles.listIcon,
+                      {
+                        backgroundColor: item?.bgColor,
+                      },
+                    ]}
+                  >
+                    {item.icon && item.icon}
+                  </View>
+                </TouchableOpacity>
+              </View>
+            );
+          })}
+        </View>
+      </View>
     </ScreenWrapper>
   );
 };
