@@ -6,6 +6,7 @@ import Button from "@/components/Button";
 import Typo from "@/components/typo";
 import { colors } from "@/constants/theme";
 import { useAuth } from "@/contexts/authContexts";
+import ScreenWrapper from "@/components/ScreenWrapper";
 
 const Home = () => {
   const { user } = useAuth();
@@ -17,12 +18,12 @@ const Home = () => {
   };
 
   return (
-    <View>
-      <Text>Home</Text>
+    <ScreenWrapper>
+      <Typo>Home</Typo>
       <Button onPress={handleLogout}>
         <Typo color={colors.black}>Logout</Typo>
       </Button>
-    </View>
+    </ScreenWrapper>
   );
 };
 
