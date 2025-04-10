@@ -27,9 +27,10 @@ const ScreenWrapper = ({ style, children }: ScreenWrapperProps) => {
         style,
       ]}
     >
-      <StatusBar barStyle={"light-content"} />{" "}
+      <StatusBar barStyle={"light-content"} />
       {/* status bar rengi beyaz yapıldı */}
-      {children} {/* children propsu ile gelen componentsler render edilecek */}
+      {children}
+      {/* children propsu ile gelen componentsler render edilecek */}
     </View>
   );
 };

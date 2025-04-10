@@ -15,34 +15,34 @@ export default function MyTabBar({
   navigation,
 }: BottomTabBarProps) {
   const tabbarIcons: any = {
-    index: (isFocused: boolean) => {
+    index: (isFocused: boolean) => (
       <Icons.House
         size={verticalScale(30)}
         weight={isFocused ? "fill" : "regular"}
         color={isFocused ? colors.primary : colors.neutral400}
-      />;
-    },
-    Statistics: (isFocused: boolean) => {
+      />
+    ),
+    statistics: (isFocused: boolean) => (
       <Icons.ChartBar
         size={verticalScale(30)}
         weight={isFocused ? "fill" : "regular"}
         color={isFocused ? colors.primary : colors.neutral400}
-      />;
-    },
-    Wallet: (isFocused: boolean) => {
+      />
+    ),
+    wallet: (isFocused: boolean) => (
       <Icons.Wallet
         size={verticalScale(30)}
         weight={isFocused ? "fill" : "regular"}
         color={isFocused ? colors.primary : colors.neutral400}
-      />;
-    },
-    Profile: (isFocused: boolean) => {
+      />
+    ),
+    profile: (isFocused: boolean) => (
       <Icons.User
         size={verticalScale(30)}
         weight={isFocused ? "fill" : "regular"}
         color={isFocused ? colors.primary : colors.neutral400}
-      />;
-    },
+      />
+    ),
   };
 
   return (

@@ -73,6 +73,7 @@ const Login = () => {
         />
         <Input
           placeholder="Enter Your Password"
+          secureTextEntry
           onChangeText={(value) => (passwordRef.current = value)} // referans değere girilen password değerini atıyor
           icon={
             <Icons.Lock

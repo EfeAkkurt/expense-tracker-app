@@ -14,7 +14,6 @@ const BackButton = ({ style, iconSize = 26 }: BackButtonProps) => {
       onPress={() => router.back()}
       style={[styles.button, style]}
     >
-      {" "}
       {/*back button */}
       <CaretLeft
         size={verticalScale(iconSize)}

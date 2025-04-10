@@ -1,4 +1,4 @@
-import { StyleSheet, Text, TouchableOpacity, View } from "react-native";
+import { Alert, StyleSheet, Text, TouchableOpacity, View } from "react-native";
 import React from "react";
 import ScreenWrapper from "@/components/ScreenWrapper";
 import { colors, radius, spacingX, spacingY } from "@/constants/theme";
@@ -11,9 +11,14 @@ import { Image } from "expo-image";
 import { getProfileImage } from "@/services/imageServices";
 import { accountOptionType } from "@/types";
 import * as Icons from "phosphor-react-native";
+import Animated, { FadeInDown } from "react-native-reanimated";
+import { signOut } from "firebase/auth";
+import { auth } from "@/config/firebase";
+import { useRouter } from "expo-router";
 
 const Profile = () => {
   const { user } = useAuth();
+  const router = useRouter();
 
   const accountOptions: accountOptionType[] = [
     {
@@ -42,6 +47,30 @@ const Profile = () => {
     },
   ];
 
+  const handleLogout = async () => {
+    await signOut(auth);
+  };
+
+  const showLogoutAlert = () => {
+    Alert.alert("Confirm", "Are you sure you want to logout", [
+      {
+        text: "Cancel",
+        onPress: () => console.log("Cancel logout"),
+        style: "cancel",
+      },
+      {
+        text: "Logout",
+        onPress: () => handleLogout(),
+        style: "destructive",
+      },
+    ]);
+  };
+
+  const handlePress = async (item: accountOptionType) => {
+    if (item.title == "Logout") showLogoutAlert();
+    if (item.routeName) router.push(item.routeName);
+  };
+
   return (
     <ScreenWrapper>
       <View style={styles.container}>
@@ -57,7 +86,7 @@ const Profile = () => {
               style={styles.avatar}
               contentFit="cover"
               transition={100}
-            />{" "}
+            />
           </View>
           {/*NAME & EMAIL*/}
           <View style={styles.nameContainer}>
@@ -74,8 +103,17 @@ const Profile = () => {
         <View style={styles.accountOptions}>
           {accountOptions.map((item, index) => {
             return (
-              <View style={styles.listItem}>
-                <TouchableOpacity style={styles.flexRow}>
+              <Animated.View
+                key={index.toString()}
+                entering={FadeInDown.delay(index * 80)
+                  .springify()
+                  .damping(24)}
+                style={styles.listItem}
+              >
+                <TouchableOpacity
+                  style={styles.flexRow}
+                  onPress={() => handlePress(item)}
+                >
                   {/*ICON*/}
                   <View
                     style={[
@@ -87,8 +125,16 @@ const Profile = () => {
                   >
                     {item.icon && item.icon}
                   </View>
+                  <Typo size={16} style={{ flex: 1 }} fontWeight={"500"}>
+                    {item.title}
+                  </Typo>
+                  <Icons.CaretRight
+                    size={verticalScale(20)}
+                    weight="bold"
+                    color={colors.white}
+                  />
                 </TouchableOpacity>
-              </View>
+              </Animated.View>
             );
           })}
         </View>

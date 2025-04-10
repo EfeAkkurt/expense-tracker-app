@@ -19,7 +19,7 @@ const Header = ({ title = "", leftIcon, style }: HeaderProps) => {
           {title}
         </Typo>
       )}
-      <Typo>Header</Typo>
+      {/* <Typo>Header</Typo> */}
     </View>
   );
 };
