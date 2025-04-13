@@ -12,6 +12,12 @@ const StackLayout = () => {
           presentation: "modal",
         }}
       />
+      <Stack.Screen
+        name="(modals)/walletModal.tsx"
+        options={{
+          presentation: "modal",
+        }}
+      />
     </Stack>
   );
 };
