@@ -1,4 +1,4 @@
-import { StyleSheet, Text, TouchableOpacity, View } from "react-native";
+import { FlatList, StyleSheet, Text, TouchableOpacity, View } from "react-native";
 import React from "react";
 import ScreenWrapper from "@/components/ScreenWrapper";
 import { colors, radius, spacingX, spacingY } from "@/constants/theme";
@@ -6,9 +6,23 @@ import { verticalScale } from "@/utils/styling";
 import Typo from "@/components/typo";
 import * as Icons from "phosphor-react-native";
 import { useRouter } from "expo-router";
+import useFetchData from "@/hooks/useFetchData";
+import { WalletType } from "@/types";
+import { useAuth } from "@/contexts/authContexts";
+import { where, orderBy } from "firebase/firestore";
+import Loading from "@/components/Loading";
+import WalletListItem from "@/components/WalletListItem";
 
 const Wallet = () => {
   const router = useRouter();
+  const { user } = useAuth();
+
+  const { data: wallets, loading, error } = useFetchData<WalletType>("wallets",[
+    where("userId", "==", user?.uid),
+    orderBy("createdAt", "desc")
+  ]);
+  //console.log("wallets:", wallets);
+ //console.log("userId:", user?.uid);
 
   const getTotalBalance = () => {
     return 2344;
@@ -47,6 +61,16 @@ const Wallet = () => {
           </View>
 
           {/*WALLETS LIST*/}
+          {loading && <Loading />}
+          <FlatList
+          data={wallets}
+          renderItem={({item, index}) => {
+          return (
+          <WalletListItem item={item} index={index} router={router} />
+          )
+          }}
+          contentContainerStyle={styles.listStyle}
+          />
         </View>
       </View>
     </ScreenWrapper>

@@ -43,6 +43,9 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
 
   const login = async (email: string, password: string) => {
     try {
+      // 5 saniye beklet
+      await new Promise((resolve) => setTimeout(resolve, 3000));
+  
       await signInWithEmailAndPassword(auth, email, password);
       return { success: true };
     } catch (error: any) {
@@ -58,11 +61,10 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
 
   const register = async (email: string, name: string, password: string) => {
     try {
-      let response = await createUserWithEmailAndPassword(
-        auth,
-        email,
-        password
-      );
+      // 5 saniye beklet
+      await new Promise((resolve) => setTimeout(resolve, 3000));
+  
+      let response = await createUserWithEmailAndPassword(auth, email, password);
       await setDoc(doc(firestore, "users", response?.user?.uid), {
         name,
         email,
@@ -78,7 +80,6 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
       return { success: false, msg };
     }
   };
-
   // UPDATE
   const updateUserData = async (uid: string) => {
     try {

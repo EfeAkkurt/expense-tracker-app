@@ -10,6 +10,8 @@ import * as Icons from "phosphor-react-native";
 import Button from "@/components/Button";
 import { useRouter } from "expo-router";
 import { useAuth } from "@/contexts/authContexts";
+import { auth } from "@/config/firebase";
+import { onAuthStateChanged } from "firebase/auth";
 
 const Login = () => {
   {
@@ -21,10 +23,20 @@ const Login = () => {
   const [isLoading, setIsLoading] = useState(false);
   const router = useRouter();
 
+  const waitForFirebaseAuthReady = async () => {
+    return new Promise<void>((resolve) => {
+      const unsub = onAuthStateChanged(auth, () => {
+        unsub();
+        resolve();
+      });
+    });
+  };
+
   {
     /* LOGIN CONTROL */
   }
   const handleSubmit = async () => {
+    await waitForFirebaseAuthReady();
     if (!emailRef.current || !passwordRef.current) {
       Alert.alert("Login", "Please fill al the fields");
       return;
