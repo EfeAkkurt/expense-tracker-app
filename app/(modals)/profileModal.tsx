@@ -20,7 +20,7 @@ import Typo from "@/components/typo";
 import { UserDataType } from "@/types";
 import Input from "@/components/Input";
 import Button from "@/components/Button";
-import { useAuth } from "@/contexts/authContexts";
+import { useAuth } from "@/contexts/authContext";
 import { updateUser } from "@/services/UserService";
 import { useRouter } from "expo-router";
 import * as ImagePicker from "expo-image-picker";

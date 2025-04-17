@@ -5,7 +5,7 @@ import { auth } from "@/config/firebase";
 import Button from "@/components/Button";
 import Typo from "@/components/typo";
 import { colors } from "@/constants/theme";
-import { useAuth } from "@/contexts/authContexts";
+import { useAuth } from "@/contexts/authContext";
 import ScreenWrapper from "@/components/ScreenWrapper";
 
 const Home = () => {
@@ -13,9 +13,9 @@ const Home = () => {
 
   console.log("user: ", user);
   //EXIT
-  // const handleLogout = async () => {
-  //   await signOut(auth);
-  // };
+   const handleLogout = async () => {
+     await signOut(auth);
+   } ;
 
   return (
     <ScreenWrapper>

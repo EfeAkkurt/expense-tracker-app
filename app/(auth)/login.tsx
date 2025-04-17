@@ -9,19 +9,16 @@ import Input from "@/components/Input";
 import * as Icons from "phosphor-react-native";
 import Button from "@/components/Button";
 import { useRouter } from "expo-router";
-import { useAuth } from "@/contexts/authContexts";
+import { useAuth } from "@/contexts/authContext";
 import { auth } from "@/config/firebase";
 import { onAuthStateChanged } from "firebase/auth";
 
-const Login = () => {
-  {
-    /* REFERENCES */
-  }
+export default function LoginScreen() {
+  const router = useRouter();
   const emailRef = useRef("");
   const passwordRef = useRef("");
   const { login: loginUser } = useAuth();
   const [isLoading, setIsLoading] = useState(false);
-  const router = useRouter();
 
   const waitForFirebaseAuthReady = async () => {
     return new Promise<void>((resolve) => {
@@ -32,9 +29,6 @@ const Login = () => {
     });
   };
 
-  {
-    /* LOGIN CONTROL */
-  }
   const handleSubmit = async () => {
     await waitForFirebaseAuthReady();
     if (!emailRef.current || !passwordRef.current) {
@@ -52,7 +46,6 @@ const Login = () => {
   return (
     <ScreenWrapper>
       <View style={styles.container}>
-        {/* BACK BUTTON */}
         <BackButton iconSize={28} />
 
         <View style={{ gap: 5, marginTop: spacingY._20 }}>
@@ -65,16 +58,13 @@ const Login = () => {
         </View>
       </View>
 
-      {/* FORM */}
-
       <View style={styles.form}>
         <Typo size={16} color={colors.textLighter}>
           Login now to track all you expenses
         </Typo>
-        {/* INPUT */}
         <Input
           placeholder="Enter Your Email"
-          onChangeText={(value) => (emailRef.current = value)} // referans değere girilen email değerini atıyor
+          onChangeText={(value) => (emailRef.current = value)}
           icon={
             <Icons.At
               size={verticalScale(26)}
@@ -86,7 +76,7 @@ const Login = () => {
         <Input
           placeholder="Enter Your Password"
           secureTextEntry
-          onChangeText={(value) => (passwordRef.current = value)} // referans değere girilen password değerini atıyor
+          onChangeText={(value) => (passwordRef.current = value)}
           icon={
             <Icons.Lock
               size={verticalScale(26)}
@@ -96,19 +86,15 @@ const Login = () => {
           }
         />
 
-        {/*FORGOT PASSWORD*/}
         <Typo size={14} color={colors.text} style={{ alignSelf: "flex-end" }}>
           Forgot Password?
         </Typo>
 
-        {/*LOGİN BUTTON */}
         <Button loading={isLoading} onPress={handleSubmit}>
           <Typo fontWeight={"700"} size={21} color={colors.black}>
             Login
           </Typo>
         </Button>
-
-        {/*FOOTER*/}
 
         <View style={styles.footer}>
           <Typo size={15}>
@@ -123,9 +109,7 @@ const Login = () => {
       </View>
     </ScreenWrapper>
   );
-};
-
-export default Login;
+}
 
 const styles = StyleSheet.create({
   container: {

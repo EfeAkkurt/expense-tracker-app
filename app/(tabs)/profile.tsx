@@ -6,7 +6,7 @@ import { verticalScale } from "@/utils/styling";
 import Header from "@/components/Header";
 import BackButton from "@/components/BackButton";
 import Typo from "@/components/typo";
-import { useAuth } from "@/contexts/authContexts";
+import { useAuth } from "@/contexts/authContext";
 import { Image } from "expo-image";
 import { getProfileImage } from "@/services/imageServices";
 import { accountOptionType } from "@/types";

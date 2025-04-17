@@ -2,6 +2,7 @@
 import { initializeApp } from "firebase/app";
 // TODO: Add SDKs for Firebase products that you want to use
 // https://firebase.google.com/docs/web/setup#available-libraries
+//@ts-ignore
 import { initializeAuth, getReactNativePersistence } from "firebase/auth";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { getFirestore } from "firebase/firestore";
@@ -9,23 +10,22 @@ import { getFirestore } from "firebase/firestore";
 
 // Your web app's Firebase configuration
 const firebaseConfig = {
-  apiKey: "AIzaSyDTlxx-HivYqpduyuIQoyV3VLW5UB5xFQo",
-  authDomain: "expense-tracker-4102a.firebaseapp.com",
-  projectId: "expense-tracker-4102a",
-  storageBucket: "expense-tracker-4102a.firebasestorage.app",
-  messagingSenderId: "170110679425",
-  appId: "1:170110679425:web:76763137695168d332d080",
+  apiKey: "AIzaSyD2yvq7ujKdDCQR2J79_iiRPhk71mYVGIg",
+  authDomain: "expense-tracker-app-80fd7.firebaseapp.com",
+  projectId: "expense-tracker-app-80fd7",
+  storageBucket: "expense-tracker-app-80fd7.firebasestorage.app",
+  messagingSenderId: "848896156433",
+  appId: "1:848896156433:web:54787487f5dae1b386e2b0"
 };
+
 
 // Initialize Firebase
 const app = initializeApp(firebaseConfig);
 
 // AUTH
-const auth = initializeAuth(app, {
+export const auth = initializeAuth(app, {
   persistence: getReactNativePersistence(AsyncStorage),
 });
 
-// DATA BASE
-const firestore = getFirestore(app);
-
-export { app, auth, firestore };
+// DATABASE
+export const firestore = getFirestore(app);

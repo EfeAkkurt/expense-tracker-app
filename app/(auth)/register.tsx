@@ -9,9 +9,9 @@ import Input from "@/components/Input";
 import * as Icons from "phosphor-react-native";
 import Button from "@/components/Button";
 import { useRouter } from "expo-router";
-import { useAuth } from "@/contexts/authContexts";
+import { useAuth } from "@/contexts/authContext";
 
-const Register = () => {
+export default function RegisterScreen() {
   // STATES
   const [isLoading, setIsLoading] = useState(false);
   const router = useRouter();
@@ -127,9 +127,7 @@ const Register = () => {
       </View>
     </ScreenWrapper>
   );
-};
-
-export default Register;
+}
 
 const styles = StyleSheet.create({
   container: {
