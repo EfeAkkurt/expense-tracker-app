@@ -7,13 +7,13 @@ const StackLayout = () => {
   return (
     <Stack screenOptions={{ headerShown: false }}>
       <Stack.Screen
-        name="(modals)/profileModal.tsx"
+        name="(modals)/profileModal"
         options={{
           presentation: "modal",
         }}
       />
       <Stack.Screen
-        name="(modals)/walletModal.tsx"
+        name="(modals)/walletModal"
         options={{
           presentation: "modal",
         }}
