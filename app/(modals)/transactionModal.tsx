@@ -33,6 +33,7 @@ import { transactionTypes, expenseCategories } from "@/constants/data";
 import useFetchData from "@/hooks/useFetchData";
 import { where, orderBy } from "firebase/firestore";
 import DateTimePicker from '@react-native-community/datetimepicker';
+import { createOrUpdateTransaction } from "@/services/transactionService";
 
 
 const TransactionModal = () => {
@@ -98,6 +99,18 @@ const TransactionModal = () => {
       uid: user?.uid,
     }
     console.log("transactionData: ", transactionData);
+
+    //todo: include transaction id for update
+    setLoading(true);
+    const res = await createOrUpdateTransaction(transactionData);
+    console.log("🔍 Transaction result: ", res);
+
+    setLoading(false);
+    if(res.success) {
+      router.back();
+    } else {
+      Alert.alert("Transaction", res.msg);
+    }
   };
 
   const onDelete = async () => {

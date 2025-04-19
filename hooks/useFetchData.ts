@@ -35,8 +35,7 @@ const useFetchData = <T>(
             setLoading(false);
         })
         return () => unsub();
-    },[])
-            console.log("🚀 ~ useEffect ~ constrains:", constrains)
+    }, [collectionName, JSON.stringify(constrains)])
 
   return { data, loading, error };
 }
