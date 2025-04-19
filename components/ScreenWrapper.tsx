@@ -14,7 +14,7 @@ const { height } = Dimensions.get("window"); // android için height alındı
 
 const ScreenWrapper = ({ style, children }: ScreenWrapperProps) => {
   // types.ts in içinde bir components mevcut screenwrapperprops için
-  let paddingTop = Platform.OS === "ios" ? height * 0.06 : 50; // android için 50px padding top verildi ve ios için %6 verildi
+  let paddingTop = Platform.OS === "ios" ? height * 0.06 : 0; // android için 50px padding top verildi ve ios için %6 verildi
 
   return (
     <View
@@ -27,7 +27,7 @@ const ScreenWrapper = ({ style, children }: ScreenWrapperProps) => {
         style,
       ]}
     >
-      <StatusBar barStyle={"light-content"} />
+      <StatusBar barStyle={"light-content"} backgroundColor={colors.neutral900}/>
       {/* status bar rengi beyaz yapıldı */}
       {children}
       {/* children propsu ile gelen componentsler render edilecek */}
