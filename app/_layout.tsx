@@ -24,17 +24,23 @@ const StackLayout = () => {
           presentation: "modal",
         }}
       />
+      <Stack.Screen
+        name="(modals)/searchModal"
+        options={{
+          presentation: "modal",
+        }}
+      />
     </Stack>
   );
 };
 
- const RootLayout=() => {
+const RootLayout = () => {
   return (
     <AuthProvider>
       <StackLayout />
     </AuthProvider>
   );
-}
+};
 
 export default RootLayout;
 
