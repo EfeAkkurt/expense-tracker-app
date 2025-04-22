@@ -130,7 +130,7 @@ const updateWalletForNewTransaction = async (
     const updatedWalletAmount =
       type == "income"
         ? Number(walletData.amount) + amount
-        : -Number(walletData.totalExpenses) - amount;
+        : Number(walletData.amount) - amount;
 
     const updatedTotals =
       type == "income"
@@ -226,9 +226,8 @@ const revertAndUpdateWallets = async (
 
     const newWalletAmount = Number(newWallet.amount) + updateTransactionAmount;
 
-    const newIncomeExpenseAmount = Number(
-      newWallet[updateType]! + Number(newTransactionAmount)
-    );
+    const newIncomeExpenseAmount =
+      Number(newWallet[updateType]) + Number(newTransactionAmount);
 
     await createOrUpdateWallet({
       id: newWalletId,
@@ -268,10 +267,12 @@ export const deleteTransaction = async (
       transactionType == "income" ? "totalIncome" : "totalExpenses";
 
     const newWalletAmount =
-      walletData?.amount! -
-      (transactionType == "income" ? transactionAmount : -transactionAmount);
+      transactionType == "income"
+        ? Number(walletData?.amount) - Number(transactionAmount)
+        : Number(walletData?.amount) + Number(transactionAmount);
 
-    const newIncomeExpenseAmount = walletData[updateType]! - transactionAmount;
+    const newIncomeExpenseAmount =
+      Number(walletData[updateType]) - Number(transactionAmount);
 
     // if its expense and the wallet amount can go below 0
     if (transactionType == "expense" && newWalletAmount < 0) {
@@ -293,20 +294,36 @@ export const deleteTransaction = async (
   }
 };
 
-export const fetchWeeklyStats = async (uid: string): Promise<ResponseType> => {
+export const fetchWeeklyStats = async (
+  uid: string,
+  selectedWalletId: string | null = null
+): Promise<ResponseType> => {
   try {
     const db = firestore;
     const today = new Date();
     const sevenDaysAgo = new Date(today);
     sevenDaysAgo.setDate(today.getDate() - 7);
 
-    const transactionsQuery = query(
-      collection(db, "transactions"),
-      where("date", ">=", Timestamp.fromDate(sevenDaysAgo)),
-      where("date", "<=", Timestamp.fromDate(today)),
-      orderBy("date", "desc"),
-      where("uid", "==", uid)
-    );
+    // Query oluşturucu
+    let transactionsQuery;
+    if (selectedWalletId) {
+      transactionsQuery = query(
+        collection(db, "transactions"),
+        where("date", ">=", Timestamp.fromDate(sevenDaysAgo)),
+        where("date", "<=", Timestamp.fromDate(today)),
+        where("uid", "==", uid),
+        where("walletId", "==", selectedWalletId),
+        orderBy("date", "desc")
+      );
+    } else {
+      transactionsQuery = query(
+        collection(db, "transactions"),
+        where("date", ">=", Timestamp.fromDate(sevenDaysAgo)),
+        where("date", "<=", Timestamp.fromDate(today)),
+        where("uid", "==", uid),
+        orderBy("date", "desc")
+      );
+    }
 
     const querySnapshot = await getDocs(transactionsQuery);
     const weeklyData = getLast7Days();
@@ -361,20 +378,36 @@ export const fetchWeeklyStats = async (uid: string): Promise<ResponseType> => {
   }
 };
 
-export const fetchMonthlyStats = async (uid: string): Promise<ResponseType> => {
+export const fetchMonthlyStats = async (
+  uid: string,
+  selectedWalletId: string | null = null
+): Promise<ResponseType> => {
   try {
     const db = firestore;
     const today = new Date();
     const twelveMonthsAgo = new Date(today);
     twelveMonthsAgo.setMonth(today.getMonth() - 12);
 
-    const transactionsQuery = query(
-      collection(db, "transactions"),
-      where("date", ">=", Timestamp.fromDate(twelveMonthsAgo)),
-      where("date", "<=", Timestamp.fromDate(today)),
-      orderBy("date", "desc"),
-      where("uid", "==", uid)
-    );
+    // Query oluşturucu
+    let transactionsQuery;
+    if (selectedWalletId) {
+      transactionsQuery = query(
+        collection(db, "transactions"),
+        where("date", ">=", Timestamp.fromDate(twelveMonthsAgo)),
+        where("date", "<=", Timestamp.fromDate(today)),
+        where("uid", "==", uid),
+        where("walletId", "==", selectedWalletId),
+        orderBy("date", "desc")
+      );
+    } else {
+      transactionsQuery = query(
+        collection(db, "transactions"),
+        where("date", ">=", Timestamp.fromDate(twelveMonthsAgo)),
+        where("date", "<=", Timestamp.fromDate(today)),
+        where("uid", "==", uid),
+        orderBy("date", "desc")
+      );
+    }
 
     const querySnapshot = await getDocs(transactionsQuery);
     const monthlyData = getLast12Months();
@@ -431,21 +464,77 @@ export const fetchMonthlyStats = async (uid: string): Promise<ResponseType> => {
   }
 };
 
-export const fetchYearlyStats = async (uid: string): Promise<ResponseType> => {
+export const fetchYearlyStats = async (
+  uid: string,
+  selectedWalletId: string | null = null
+): Promise<ResponseType> => {
   try {
     const db = firestore;
 
-    const transactionsQuery = query(
-      collection(db, "transactions"),
-      orderBy("date", "desc"),
-      where("uid", "==", uid)
-    );
+    // Query oluşturucu
+    let transactionsQuery;
+    if (selectedWalletId) {
+      transactionsQuery = query(
+        collection(db, "transactions"),
+        where("uid", "==", uid),
+        where("walletId", "==", selectedWalletId),
+        orderBy("date", "desc")
+      );
+    } else {
+      transactionsQuery = query(
+        collection(db, "transactions"),
+        where("uid", "==", uid),
+        orderBy("date", "desc")
+      );
+    }
 
     const querySnapshot = await getDocs(transactionsQuery);
     const transactions: TransactionType[] = [];
 
-    const firstTransacion = querySnapshot.docs.reduce((earliest, doc) => {
-      const transactionDate = doc.data().date.toDate();
+    // Eğer transactions yoksa default date'i şimdiki zaman yapalım
+    if (querySnapshot.empty) {
+      const currentYear = new Date().getFullYear();
+      const yearlyData = getYearsRange(currentYear, currentYear);
+
+      const stats = yearlyData.flatMap((year) => [
+        {
+          value: 0,
+          label: year.year,
+          spacing: scale(4),
+          labelWidth: scale(35),
+          frontColor: colors.primary,
+        },
+        {
+          value: 0,
+          frontColor: colors.rose,
+        },
+      ]);
+
+      return {
+        success: true,
+        data: {
+          stats,
+          transactions,
+        },
+      };
+    }
+
+    const firstTransacion = querySnapshot.docs.reduce((earliest: Date, doc) => {
+      // unknown tipindeki data'yı açıkça cast edelim
+      const data = doc.data() as { date: Timestamp | Date | string };
+
+      // Şimdi date tiplerini güvenli bir şekilde kontrol edebiliriz
+      let transactionDate: Date;
+
+      if (data.date instanceof Timestamp) {
+        transactionDate = data.date.toDate();
+      } else if (data.date instanceof Date) {
+        transactionDate = data.date;
+      } else {
+        // String veya diğer tipler için güvenli bir fallback
+        transactionDate = new Date();
+      }
+
       return transactionDate < earliest ? transactionDate : earliest;
     }, new Date());
 

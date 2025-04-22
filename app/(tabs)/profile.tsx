@@ -4,7 +4,6 @@ import ScreenWrapper from "@/components/ScreenWrapper";
 import { colors, radius, spacingX, spacingY } from "@/constants/theme";
 import { verticalScale } from "@/utils/styling";
 import Header from "@/components/Header";
-import BackButton from "@/components/BackButton";
 import Typo from "@/components/typo";
 import { useAuth } from "@/contexts/authContext";
 import { Image } from "expo-image";
@@ -180,7 +179,7 @@ const styles = StyleSheet.create({
     padding: 5,
   },
   nameContainer: {
-    gap: verticalScale(44),
+    gap: verticalScale(8),
     alignItems: "center",
   },
   listIcon: {

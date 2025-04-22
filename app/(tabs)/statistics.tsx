@@ -1,5 +1,12 @@
-import { Alert, ScrollView, StyleSheet, Text, View } from "react-native";
-import React, { useEffect, useState } from "react";
+import {
+  Alert,
+  ScrollView,
+  StyleSheet,
+  Text,
+  View,
+  TouchableOpacity,
+} from "react-native";
+import React, { useEffect, useState, useCallback } from "react";
 import ScreenWrapper from "@/components/ScreenWrapper";
 import { colors, radius, spacingX, spacingY } from "@/constants/theme";
 import { scale, verticalScale } from "@/utils/styling";
@@ -16,10 +23,25 @@ import {
 } from "@/services/transactionService";
 import TransactionList from "@/components/TransactionList";
 import SwitchButton from "@/components/SwitchButton";
+import * as Icons from "phosphor-react-native";
+import {
+  where,
+  orderBy,
+  collection,
+  query,
+  getDocs,
+  Timestamp,
+} from "firebase/firestore";
+import { firestore } from "@/config/firebase";
+import { WalletType } from "@/types";
+import useFetchData from "@/hooks/useFetchData";
+import { useFocusEffect } from "@react-navigation/native";
 
 const Statistics = () => {
   const [activeIndex, setActiveIndex] = useState(0);
   const { user } = useAuth();
+  const [selectedWalletId, setSelectedWalletId] = useState<string | null>(null);
+  const [showWalletSelector, setShowWalletSelector] = useState(false);
   const [chartData, setChartData] = useState([
     {
       value: 40,
@@ -108,6 +130,12 @@ const Statistics = () => {
   const [transactions, setTransactions] = useState([]);
   const [isLineChart, setIsLineChart] = useState(false);
 
+  // Cüzdanları çek
+  const { data: wallets, loading: walletsLoading } = useFetchData<WalletType>(
+    "wallets",
+    [where("uid", "==", user?.uid), orderBy("created", "desc")]
+  );
+
   // STATS
   useEffect(() => {
     if (activeIndex === 0) {
@@ -119,11 +147,26 @@ const Statistics = () => {
     if (activeIndex === 2) {
       getYearlyStats();
     }
-  }, [activeIndex]);
+  }, [activeIndex, selectedWalletId]);
+
+  // Sayfa her odaklandığında verileri yenile
+  useFocusEffect(
+    useCallback(() => {
+      if (user?.uid) {
+        if (activeIndex === 0) {
+          getWeeklyStats();
+        } else if (activeIndex === 1) {
+          getMonthlyStats();
+        } else if (activeIndex === 2) {
+          getYearlyStats();
+        }
+      }
+    }, [user?.uid, activeIndex, selectedWalletId])
+  );
 
   const getWeeklyStats = async () => {
     setChartLoading(true);
-    let res = await fetchWeeklyStats(user?.uid as string);
+    let res = await fetchWeeklyStats(user?.uid as string, selectedWalletId);
     setChartLoading(false);
     if (res.success) {
       setChartData(res?.data?.stats);
@@ -132,9 +175,10 @@ const Statistics = () => {
       Alert.alert("error :", res.msg);
     }
   };
+
   const getMonthlyStats = async () => {
     setChartLoading(true);
-    let res = await fetchMonthlyStats(user?.uid as string);
+    let res = await fetchMonthlyStats(user?.uid as string, selectedWalletId);
     setChartLoading(false);
     if (res.success) {
       setChartData(res?.data?.stats);
@@ -143,9 +187,10 @@ const Statistics = () => {
       Alert.alert("error :", res.msg);
     }
   };
+
   const getYearlyStats = async () => {
     setChartLoading(true);
-    let res = await fetchYearlyStats(user?.uid as string);
+    let res = await fetchYearlyStats(user?.uid as string, selectedWalletId);
     setChartLoading(false);
     if (res.success) {
       setChartData(res?.data?.stats);
@@ -172,12 +217,74 @@ const Statistics = () => {
       }));
   };
 
+  // Segmente tıklama işlemi - yükleme sırasında devre dışı bırakmayı yönetir
+  const handleSegmentChange = (event) => {
+    if (!chartLoading) {
+      setActiveIndex(event.nativeEvent.selectedSegmentIndex);
+    }
+  };
+
   return (
     <ScreenWrapper>
       <View style={styles.container}>
         <View style={styles.header}>
           <Header title="Statistics" />
         </View>
+
+        {/* Cüzdan Seçici */}
+        <View style={styles.headerOptions}>
+          <TouchableOpacity
+            onPress={() => setShowWalletSelector(!showWalletSelector)}
+            style={styles.walletSelector}
+          >
+            <Icons.Wallet size={verticalScale(16)} color={colors.primary} />
+            <Typo size={14} color={colors.primary}>
+              {selectedWalletId
+                ? wallets?.find((w) => w.id === selectedWalletId)?.name ||
+                  "Loading..."
+                : "All Wallets"}
+            </Typo>
+            <Icons.CaretDown size={verticalScale(12)} color={colors.primary} />
+          </TouchableOpacity>
+        </View>
+
+        {/* Cüzdan Seçici Dropdown */}
+        {showWalletSelector && (
+          <View style={styles.walletDropdown}>
+            <TouchableOpacity
+              style={[
+                styles.walletOption,
+                !selectedWalletId && styles.selectedWalletOption,
+              ]}
+              onPress={() => {
+                setSelectedWalletId(null);
+                setShowWalletSelector(false);
+              }}
+            >
+              <Icons.Wallet size={verticalScale(16)} color={colors.white} />
+              <Typo size={14}>All Wallets</Typo>
+            </TouchableOpacity>
+
+            {wallets?.map((wallet) => (
+              <TouchableOpacity
+                key={wallet.id}
+                style={[
+                  styles.walletOption,
+                  selectedWalletId === wallet.id && styles.selectedWalletOption,
+                ]}
+                onPress={() => {
+                  if (wallet.id) {
+                    setSelectedWalletId(wallet.id);
+                  }
+                  setShowWalletSelector(false);
+                }}
+              >
+                <Icons.Wallet size={verticalScale(16)} color={colors.white} />
+                <Typo size={14}>{wallet.name}</Typo>
+              </TouchableOpacity>
+            ))}
+          </View>
+        )}
 
         <ScrollView
           contentContainerStyle={{
@@ -187,25 +294,36 @@ const Statistics = () => {
           }}
           showsVerticalScrollIndicator={false}
         >
-          <SegmentedControl
-            values={["Weekly", "Monthly", "Yearly"]}
-            selectedIndex={activeIndex}
-            onChange={(event) => {
-              setActiveIndex(event.nativeEvent.selectedSegmentIndex);
-            }}
-            tintColor={colors.neutral200}
-            backgroundColor={colors.neutral800}
-            appearance="dark"
-            activeFontStyle={styles.segmentFontStyle}
-            style={styles.segmentStyle}
-            fontStyle={{ ...styles.segmentFontStyle, color: colors.white }}
-          />
+          <View style={chartLoading ? styles.disabledSegment : {}}>
+            <SegmentedControl
+              values={["Weekly", "Monthly", "Yearly"]}
+              selectedIndex={activeIndex}
+              onChange={handleSegmentChange}
+              tintColor={colors.neutral200}
+              backgroundColor={colors.neutral800}
+              appearance="dark"
+              activeFontStyle={styles.segmentFontStyle}
+              style={[
+                styles.segmentStyle,
+                chartLoading && styles.segmentDisabled,
+              ]}
+              fontStyle={{
+                ...styles.segmentFontStyle,
+                color: chartLoading ? colors.neutral500 : colors.white,
+              }}
+              enabled={!chartLoading}
+            />
+          </View>
 
           <View style={styles.chartHeader}>
             <Typo size={16} fontWeight={"500"}>
               {isLineChart ? "Area Chart" : "Bar Chart"}
             </Typo>
-            <SwitchButton isEnabled={isLineChart} onToggle={toggleChartType} />
+            <SwitchButton
+              isEnabled={isLineChart}
+              onToggle={toggleChartType}
+              disabled={chartLoading}
+            />
           </View>
 
           <View style={styles.chartContainer}>
@@ -321,10 +439,16 @@ const styles = StyleSheet.create({
   segmentStyle: {
     height: scale(37),
   },
+  segmentDisabled: {
+    opacity: 0.7,
+  },
   segmentFontStyle: {
     fontSize: verticalScale(13),
     fontWeight: "bold",
     color: colors.black,
+  },
+  disabledSegment: {
+    position: "relative",
   },
   container: {
     paddingHorizontal: spacingX._20,
@@ -336,5 +460,46 @@ const styles = StyleSheet.create({
     justifyContent: "space-between",
     alignItems: "center",
     marginBottom: spacingY._5,
+  },
+  headerOptions: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "flex-end",
+    marginBottom: spacingY._10,
+  },
+  walletSelector: {
+    flexDirection: "row",
+    alignItems: "center",
+    backgroundColor: colors.neutral800,
+    paddingHorizontal: spacingX._7,
+    paddingVertical: spacingY._5,
+    borderRadius: 50,
+    gap: spacingX._5,
+  },
+  walletDropdown: {
+    position: "absolute",
+    top: verticalScale(100),
+    right: spacingX._20,
+    zIndex: 10,
+    backgroundColor: colors.neutral800,
+    borderRadius: radius._12,
+    padding: spacingX._10,
+    width: "60%",
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.3,
+    shadowRadius: 4,
+    elevation: 8,
+  },
+  walletOption: {
+    flexDirection: "row",
+    alignItems: "center",
+    paddingVertical: spacingY._10,
+    paddingHorizontal: spacingX._7,
+    borderRadius: radius._10,
+    gap: spacingX._7,
+  },
+  selectedWalletOption: {
+    backgroundColor: colors.neutral700,
   },
 });

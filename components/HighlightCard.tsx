@@ -104,9 +104,9 @@ const HighlightCard = ({
         <Typo size={18} fontWeight="500">
           Financial Summary
         </Typo>
-        <TouchableOpacity>
+        {/* <TouchableOpacity>
           <Icons.Info size={verticalScale(18)} color={colors.neutral350} />
-        </TouchableOpacity>
+        </TouchableOpacity> */}
       </View>
 
       <ScrollView

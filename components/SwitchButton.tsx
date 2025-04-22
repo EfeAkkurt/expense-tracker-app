@@ -1,38 +1,54 @@
-import React, { useState } from "react";
+import React from "react";
 import { View, TouchableOpacity, StyleSheet } from "react-native";
-import { Feather } from "@expo/vector-icons";
+import { AntDesign } from "@expo/vector-icons";
 import { colors } from "@/constants/theme";
 
 interface SwitchButtonProps {
   isEnabled: boolean;
   onToggle: () => void;
+  disabled?: boolean;
 }
 
-const SwitchButton = ({ isEnabled, onToggle }: SwitchButtonProps) => {
+const SwitchButton = ({
+  isEnabled,
+  onToggle,
+  disabled = false,
+}: SwitchButtonProps) => {
   return (
     <TouchableOpacity
       activeOpacity={0.8}
       onPress={onToggle}
       style={styles.container}
+      disabled={disabled}
     >
-      <View style={[styles.toggleSlot, isEnabled && styles.toggleSlotActive]}>
+      <View
+        style={[
+          styles.toggleSlot,
+          isEnabled && styles.toggleSlotActive,
+          disabled && styles.disabled,
+        ]}
+      >
         <View style={styles.sunIconWrapper}>
-          <Feather
-            name="sun"
+          <AntDesign
+            name="barschart"
             size={16}
-            color="#ffbb52"
-            style={styles.sunIcon}
+            color={colors.primary}
+            style={[styles.sunIcon, disabled && styles.disabledIcon]}
           />
         </View>
         <View
-          style={[styles.toggleButton, isEnabled && styles.toggleButtonActive]}
+          style={[
+            styles.toggleButton,
+            isEnabled && styles.toggleButtonActive,
+            disabled && styles.disabledButton,
+          ]}
         />
         <View style={styles.moonIconWrapper}>
-          <Feather
-            name="moon"
+          <AntDesign
+            name="areachart"
             size={16}
             color="white"
-            style={styles.moonIcon}
+            style={[styles.moonIcon, disabled && styles.disabledIcon]}
           />
         </View>
       </View>
@@ -50,11 +66,11 @@ const styles = StyleSheet.create({
     height: 28,
     width: 56,
     borderRadius: 28,
-    backgroundColor: "white",
+    backgroundColor: colors.neutral700,
     justifyContent: "center",
   },
   toggleSlotActive: {
-    backgroundColor: "#374151",
+    backgroundColor: colors.neutral800,
   },
   toggleButton: {
     position: "absolute",
@@ -62,16 +78,14 @@ const styles = StyleSheet.create({
     height: 22,
     width: 22,
     borderRadius: 22,
-    backgroundColor: "#ffeccf",
-    shadowColor: "#ffbb52",
-    shadowOpacity: 1,
-    shadowRadius: 6,
-    shadowOffset: { width: 0, height: 0 },
+    backgroundColor: colors.neutral200,
+    shadowOpacity: 0.2,
+    shadowRadius: 3,
+    shadowOffset: { width: 0, height: 1 },
     elevation: 2,
   },
   toggleButtonActive: {
-    backgroundColor: "#485367",
-    shadowColor: "white",
+    backgroundColor: colors.primary,
     transform: [{ translateX: 28 }],
   },
   sunIconWrapper: {
@@ -81,7 +95,7 @@ const styles = StyleSheet.create({
     zIndex: 1,
   },
   sunIcon: {
-    color: "#ffbb52",
+    color: colors.primary,
   },
   moonIconWrapper: {
     position: "absolute",
@@ -90,7 +104,16 @@ const styles = StyleSheet.create({
     zIndex: 1,
   },
   moonIcon: {
-    color: "white",
+    color: colors.white,
+  },
+  disabled: {
+    opacity: 0.5,
+  },
+  disabledIcon: {
+    opacity: 0.5,
+  },
+  disabledButton: {
+    backgroundColor: colors.neutral400,
   },
 });
 
