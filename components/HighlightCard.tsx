@@ -1,169 +1,83 @@
 import React from "react";
-import { View, StyleSheet, ScrollView, TouchableOpacity } from "react-native";
-import { colors, radius, spacingX, spacingY } from "@/constants/theme";
-import { verticalScale, scale } from "@/utils/styling";
+import { View, StyleSheet, ActivityIndicator } from "react-native";
+import {
+  colors,
+  getColors,
+  radius,
+  spacingX,
+  spacingY,
+} from "@/constants/theme";
+import { verticalScale } from "@/utils/styling";
 import Typo from "./typo";
-import * as Icons from "phosphor-react-native";
-
-interface HighlightItemProps {
-  title: string;
-  value: string;
-  subtitle: string;
-  iconName: keyof typeof Icons;
-  color: string;
-}
-
-const HighlightItem = ({
-  title,
-  value,
-  subtitle,
-  iconName,
-  color,
-}: HighlightItemProps) => {
-  const Icon = Icons[iconName] as any;
-
-  return (
-    <View style={styles.highlightItem}>
-      <View style={[styles.iconContainer, { backgroundColor: color }]}>
-        <Icon size={verticalScale(22)} color="white" weight="fill" />
-      </View>
-      <View style={styles.contentContainer}>
-        <Typo size={12} color={colors.neutral350}>
-          {title}
-        </Typo>
-        <Typo size={16} fontWeight="bold" color={colors.white}>
-          {value}
-        </Typo>
-        <Typo size={11} color={colors.neutral350}>
-          {subtitle}
-        </Typo>
-      </View>
-    </View>
-  );
-};
+import { useTheme } from "@/contexts/themeContext";
 
 interface HighlightCardProps {
-  mostProfitableDay?: {
-    day: string;
-    amount: number;
-  };
-  mostExpensiveDay?: {
-    day: string;
-    amount: number;
-  };
-  mostProfitableMonth?: {
-    month: string;
-    amount: number;
-  };
-  mostExpensiveMonth?: {
-    month: string;
-    amount: number;
-  };
+  title: string;
+  value: string;
+  amount: number;
+  loading?: boolean;
+  icon: React.ReactNode;
+  bgColor: string;
 }
 
 const HighlightCard = ({
-  mostProfitableDay = { day: "Friday", amount: 532 },
-  mostExpensiveDay = { day: "Saturday", amount: 285 },
-  mostProfitableMonth = { month: "March", amount: 2458 },
-  mostExpensiveMonth = { month: "July", amount: 1670 },
+  title,
+  value,
+  amount,
+  loading = false,
+  icon,
+  bgColor,
 }: HighlightCardProps) => {
-  const highlights: HighlightItemProps[] = [
-    {
-      title: "Most gains this month",
-      value: `$${mostProfitableDay.amount}`,
-      subtitle: `${mostProfitableDay.day}`,
-      iconName: "ArrowUp",
-      color: colors.primary,
-    },
-    {
-      title: "Most expensive day this month",
-      value: `$${mostExpensiveDay.amount}`,
-      subtitle: `${mostExpensiveDay.day}`,
-      iconName: "ArrowDown",
-      color: colors.rose,
-    },
-    {
-      title: "Most profitable month",
-      value: `$${mostProfitableMonth.amount}`,
-      subtitle: `${mostProfitableMonth.month}`,
-      iconName: "CalendarPlus",
-      color: colors.primary,
-    },
-    {
-      title: "Most expensive month",
-      value: `$${mostExpensiveMonth.amount}`,
-      subtitle: `${mostExpensiveMonth.month}`,
-      iconName: "CalendarMinus",
-      color: colors.rose,
-    },
-  ];
+  const { theme } = useTheme();
+  const themeColors = getColors(theme);
 
   return (
-    <View style={styles.container}>
-      <View style={styles.headerContainer}>
-        <Typo size={18} fontWeight="500">
-          Financial Summary
-        </Typo>
-        {/* <TouchableOpacity>
-          <Icons.Info size={verticalScale(18)} color={colors.neutral350} />
-        </TouchableOpacity> */}
+    <View style={[styles.container, { backgroundColor: bgColor }]}>
+      <View style={styles.content}>
+        <View style={styles.iconContainer}>{icon}</View>
+        <View style={styles.textContainer}>
+          <Typo size={12} color={themeColors.white} style={styles.title}>
+            {title}
+          </Typo>
+          {loading ? (
+            <ActivityIndicator color={themeColors.white} size="small" />
+          ) : (
+            <>
+              <Typo size={16} fontWeight="600" color={themeColors.white}>
+                {value}
+              </Typo>
+              <Typo size={15} color={themeColors.white}>
+                ${amount}
+              </Typo>
+            </>
+          )}
+        </View>
       </View>
-
-      <ScrollView
-        horizontal
-        showsHorizontalScrollIndicator={false}
-        contentContainerStyle={styles.scrollContainer}
-      >
-        {highlights.map((item, index) => (
-          <HighlightItem
-            key={index}
-            title={item.title}
-            value={item.value}
-            subtitle={item.subtitle}
-            iconName={item.iconName}
-            color={item.color}
-          />
-        ))}
-      </ScrollView>
     </View>
   );
 };
 
+export default HighlightCard;
+
 const styles = StyleSheet.create({
   container: {
-    marginVertical: spacingY._10,
+    flex: 1,
+    padding: spacingY._15,
+    borderRadius: radius._15,
+    borderCurve: "continuous",
   },
-  headerContainer: {
-    flexDirection: "row",
-    justifyContent: "space-between",
-    alignItems: "center",
-    marginBottom: spacingY._10,
-  },
-  scrollContainer: {
-    paddingRight: spacingX._20,
-  },
-  highlightItem: {
-    width: scale(160),
-    height: verticalScale(90),
-    backgroundColor: colors.neutral800,
-    borderRadius: radius._12,
-    padding: spacingY._10,
-    marginRight: spacingX._10,
+  content: {
     flexDirection: "row",
     alignItems: "center",
   },
   iconContainer: {
-    width: verticalScale(40),
-    height: verticalScale(40),
-    borderRadius: radius._12,
-    justifyContent: "center",
-    alignItems: "center",
     marginRight: spacingX._10,
   },
-  contentContainer: {
+  textContainer: {
     flex: 1,
-    justifyContent: "center",
+  },
+  title: {
+    marginBottom: spacingY._5,
+    opacity: 0.8,
   },
 });
-
-export default HighlightCard;

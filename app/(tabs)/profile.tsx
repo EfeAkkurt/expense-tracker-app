@@ -1,7 +1,13 @@
 import { Alert, StyleSheet, Text, TouchableOpacity, View } from "react-native";
 import React from "react";
 import ScreenWrapper from "@/components/ScreenWrapper";
-import { colors, radius, spacingX, spacingY } from "@/constants/theme";
+import {
+  colors,
+  getColors,
+  radius,
+  spacingX,
+  spacingY,
+} from "@/constants/theme";
 import { verticalScale } from "@/utils/styling";
 import Header from "@/components/Header";
 import Typo from "@/components/typo";
@@ -14,33 +20,36 @@ import Animated, { FadeInDown } from "react-native-reanimated";
 import { signOut } from "firebase/auth";
 import { auth } from "@/config/firebase";
 import { useRouter } from "expo-router";
+import { useTheme } from "@/contexts/themeContext";
 
 const Profile = () => {
   const { user } = useAuth();
   const router = useRouter();
+  const { theme } = useTheme();
+  const themeColors = getColors(theme);
 
   const accountOptions: accountOptionType[] = [
     {
       title: "Edit Profile",
-      icon: <Icons.User size={26} color={colors.white} weight="fill" />,
+      icon: <Icons.User size={26} color={themeColors.white} weight="fill" />,
       routeName: "/(modals)/profileModal",
-      bgColor: "#6366f1",
+      bgColor: theme === "dark" ? "#6366f1" : themeColors.buttonBg,
     },
     {
       title: "Settings",
-      icon: <Icons.GearSix size={26} color={colors.white} weight="fill" />,
-      //routeName: "/(modals)/profileModal",
-      bgColor: "#059669",
+      icon: <Icons.GearSix size={26} color={themeColors.white} weight="fill" />,
+      routeName: "/(modals)/settingsModal",
+      bgColor: theme === "dark" ? "#059669" : themeColors.buttonBg,
     },
     {
       title: "Privacy Policy",
-      icon: <Icons.Lock size={26} color={colors.white} weight="fill" />,
+      icon: <Icons.Lock size={26} color={themeColors.white} weight="fill" />,
       //routeName: "/(modals)/profileModal",
-      bgColor: colors.neutral800,
+      bgColor: theme === "dark" ? themeColors.neutral800 : themeColors.buttonBg,
     },
     {
       title: "Logout",
-      icon: <Icons.Power size={26} color={colors.white} weight="fill" />,
+      icon: <Icons.Power size={26} color={themeColors.white} weight="fill" />,
       //routeName: "/(modals)/profileModal",
       bgColor: "#e11d48",
     },
@@ -72,9 +81,15 @@ const Profile = () => {
 
   return (
     <ScreenWrapper>
-      <View style={styles.container}>
+      <View
+        style={[styles.container, { backgroundColor: themeColors.background }]}
+      >
         {/* HEADER */}
-        <Header title="Profile" style={{ marginVertical: spacingY._10 }} />
+        <Header
+          title="Profile"
+          style={{ marginVertical: spacingY._10 }}
+          textColor={themeColors.text}
+        />
         {/*USER INFO*/}
         <View style={styles.userInfo}>
           {/*AVATAR*/}
@@ -89,11 +104,11 @@ const Profile = () => {
           </View>
           {/*NAME & EMAIL*/}
           <View style={styles.nameContainer}>
-            <Typo size={24} fontWeight={"600"} color={colors.neutral100}>
+            <Typo size={24} fontWeight={"600"} color={themeColors.text}>
               {user?.name}
             </Typo>
 
-            <Typo size={15} color={colors.neutral400}>
+            <Typo size={15} color={themeColors.textLight}>
               {user?.email}
             </Typo>
           </View>
@@ -124,13 +139,22 @@ const Profile = () => {
                   >
                     {item.icon && item.icon}
                   </View>
-                  <Typo size={16} style={{ flex: 1 }} fontWeight={"500"}>
+                  <Typo
+                    size={16}
+                    style={{ flex: 1 }}
+                    fontWeight={"500"}
+                    color={themeColors.text}
+                  >
                     {item.title}
                   </Typo>
                   <Icons.CaretRight
                     size={verticalScale(20)}
                     weight="bold"
-                    color={colors.white}
+                    color={
+                      theme === "dark"
+                        ? themeColors.white
+                        : themeColors.navigationIcon
+                    }
                   />
                 </TouchableOpacity>
               </Animated.View>

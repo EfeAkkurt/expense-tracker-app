@@ -1,9 +1,12 @@
 import { Image, StyleSheet, Text, View } from "react-native";
 import React, { useEffect } from "react";
-import { colors } from "@/constants/theme";
+import { colors, getColors } from "@/constants/theme";
 import { Stack, useRouter } from "expo-router";
+import { useTheme } from "@/contexts/themeContext";
 
 const index = () => {
+  const { theme } = useTheme();
+  const themeColors = getColors(theme);
   // const router = useRouter();
   // useEffect(() => {
   //   setTimeout(() => {
@@ -12,7 +15,7 @@ const index = () => {
   // }, []);
 
   return (
-    <View style={styles.container}>
+    <View style={[styles.container, { backgroundColor: themeColors.white }]}>
       <Image
         style={styles.logo}
         resizeMode="contain"
@@ -29,7 +32,6 @@ const styles = StyleSheet.create({
     flex: 1,
     justifyContent: "center",
     alignItems: "center",
-    backgroundColor: colors.neutral900,
   },
   logo: {
     width: "20%",

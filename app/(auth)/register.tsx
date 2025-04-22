@@ -2,7 +2,7 @@ import { Alert, Pressable, StyleSheet, Text, View } from "react-native";
 import React, { useRef, useState } from "react";
 import ScreenWrapper from "@/components/ScreenWrapper";
 import Typo from "@/components/typo";
-import { colors, spacingX, spacingY } from "@/constants/theme";
+import { colors, getColors, spacingX, spacingY } from "@/constants/theme";
 import { verticalScale } from "@/utils/styling";
 import BackButton from "@/components/BackButton";
 import Input from "@/components/Input";
@@ -10,84 +10,87 @@ import * as Icons from "phosphor-react-native";
 import Button from "@/components/Button";
 import { useRouter } from "expo-router";
 import { useAuth } from "@/contexts/authContext";
+import { useTheme } from "@/contexts/themeContext";
 
 export default function RegisterScreen() {
-  // STATES
-  const [isLoading, setIsLoading] = useState(false);
-  const router = useRouter();
+  const { theme } = useTheme();
+  const themeColors = getColors(theme);
 
-  const { register: registerUser } = useAuth();
-
-  {
-    /* REFERENCES */
-  }
   const emailRef = useRef("");
   const passwordRef = useRef("");
   const nameRef = useRef("");
+  const router = useRouter();
+  const [isLoading, setIsLoading] = useState(false);
+  const { register: registerUser } = useAuth();
 
-  {
-    /* LOGIN CONTROL */
-  }
-  const handleSubmit = async () => {
-    if (!emailRef.current || !passwordRef.current || !nameRef.current) {
-      Alert.alert("Sign Up", "Please fill al the fields");
+  const handleRegister = async () => {
+    if (!nameRef.current || !emailRef.current || !passwordRef.current) {
+      Alert.alert("Register", "Please fill all the fields");
       return;
     }
     setIsLoading(true);
     const res = await registerUser(
       emailRef.current,
-      nameRef.current,
-      passwordRef.current
+      passwordRef.current,
+      nameRef.current
     );
     setIsLoading(false);
-    console.log("register result: ", res);
     if (!res.success) {
-      Alert.alert("Sign Up", res.msg);
+      Alert.alert("Registration", res.msg);
     }
   };
 
   return (
     <ScreenWrapper>
       <View style={styles.container}>
-        {/* BACK BUTTON */}
         <BackButton iconSize={28} />
 
         <View style={{ gap: 5, marginTop: spacingY._20 }}>
-          <Typo size={30} fontWeight={"800"}>
-            Let's
+          <Typo size={30} fontWeight={"800"} color={themeColors.text}>
+            Create
           </Typo>
-          <Typo size={30} fontWeight={"800"}>
-            Get Started
+          <Typo size={30} fontWeight={"800"} color={themeColors.text}>
+            Account
           </Typo>
         </View>
       </View>
 
-      {/* FORM */}
-
       <View style={styles.form}>
-        <Typo size={16} color={colors.textLighter}>
-          Create An Account To Track Your Expenses
+        <Typo size={16} color={themeColors.textLight}>
+          Register to get Started
         </Typo>
-
-        {/* INPUT */}
         <Input
           placeholder="Enter Your Name"
-          onChangeText={(value) => (nameRef.current = value)} // referans değere girilen name değerini atıyor
+          onChangeText={(value) => (nameRef.current = value)}
+          inputStyle={{ color: themeColors.text }}
+          containerStyle={{
+            borderColor:
+              theme === "light" ? themeColors.navyBlue : colors.neutral600,
+          }}
           icon={
             <Icons.User
               size={verticalScale(26)}
-              color={colors.neutral300}
+              color={
+                theme === "light" ? themeColors.navyBlue : colors.neutral300
+              }
               weight="fill"
             />
           }
         />
         <Input
           placeholder="Enter Your Email"
-          onChangeText={(value) => (emailRef.current = value)} // referans değere girilen email değerini atıyor
+          onChangeText={(value) => (emailRef.current = value)}
+          inputStyle={{ color: themeColors.text }}
+          containerStyle={{
+            borderColor:
+              theme === "light" ? themeColors.navyBlue : colors.neutral600,
+          }}
           icon={
             <Icons.At
               size={verticalScale(26)}
-              color={colors.neutral300}
+              color={
+                theme === "light" ? themeColors.navyBlue : colors.neutral300
+              }
               weight="fill"
             />
           }
@@ -95,34 +98,46 @@ export default function RegisterScreen() {
         <Input
           placeholder="Enter Your Password"
           secureTextEntry
-          onChangeText={(value) => (passwordRef.current = value)} // referans değere girilen password değerini atıyor
+          onChangeText={(value) => (passwordRef.current = value)}
+          inputStyle={{ color: themeColors.text }}
+          containerStyle={{
+            borderColor:
+              theme === "light" ? themeColors.navyBlue : colors.neutral600,
+          }}
           icon={
             <Icons.Lock
               size={verticalScale(26)}
-              color={colors.neutral300}
+              color={
+                theme === "light" ? themeColors.navyBlue : colors.neutral300
+              }
               weight="fill"
             />
           }
         />
 
-        {/*SIGN UP BUTTON */}
-        <Button loading={isLoading} onPress={handleSubmit}>
-          <Typo fontWeight={"700"} size={21} color={colors.black}>
+        <Button
+          loading={isLoading}
+          onPress={handleRegister}
+          style={{ backgroundColor: themeColors.navyBlue }}
+        >
+          <Typo fontWeight={"700"} size={21} color={themeColors.white}>
             Sign Up
           </Typo>
         </Button>
 
-        {/*FOOTER*/}
-
         <View style={styles.footer}>
-          <Typo size={15}>
-            Already have an account?
-            <Pressable onPress={() => router.navigate("/(auth)/login")}>
-              <Typo size={15} color={colors.primary} fontWeight={"700"}>
-                Login
-              </Typo>
-            </Pressable>
+          <Typo size={15} color={themeColors.text}>
+            Already have an account{" "}
           </Typo>
+          <Pressable onPress={() => router.navigate("/(auth)/login")}>
+            <Typo
+              size={15}
+              color={theme === "light" ? themeColors.navyBlue : colors.primary}
+              fontWeight={"700"}
+            >
+              Sign In
+            </Typo>
+          </Pressable>
         </View>
       </View>
     </ScreenWrapper>
@@ -132,31 +147,21 @@ export default function RegisterScreen() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    gap: spacingY._30,
+    gap: 30,
     paddingHorizontal: spacingX._20,
   },
   welcomeText: {
-    fontSize: verticalScale(20),
+    fontSize: 20,
     fontWeight: "bold",
-    color: colors.text,
   },
   form: {
     gap: spacingY._20,
-  },
-  forgotPassword: {
-    textAlign: "right",
-    fontWeight: "500",
-    color: colors.text,
+    paddingHorizontal: spacingX._20,
+    paddingBottom: spacingY._30,
   },
   footer: {
     flexDirection: "row",
     justifyContent: "center",
     alignItems: "center",
-    gap: 5,
-  },
-  footerText: {
-    textAlign: "center",
-    color: colors.text,
-    fontSize: verticalScale(15),
   },
 });

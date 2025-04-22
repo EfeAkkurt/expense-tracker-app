@@ -1,7 +1,8 @@
-import React from "react";
-import { View, TouchableOpacity, StyleSheet } from "react-native";
+import React, { useEffect } from "react";
+import { View, TouchableOpacity, StyleSheet, Animated } from "react-native";
 import { AntDesign } from "@expo/vector-icons";
-import { colors } from "@/constants/theme";
+import { colors, getColors, radius } from "@/constants/theme";
+import { useTheme } from "@/contexts/themeContext";
 
 interface SwitchButtonProps {
   isEnabled: boolean;
@@ -14,6 +15,39 @@ const SwitchButton = ({
   onToggle,
   disabled = false,
 }: SwitchButtonProps) => {
+  const { theme } = useTheme();
+  const themeColors = getColors(theme);
+
+  // Create animated value for toggle position
+  const toggleAnim = new Animated.Value(isEnabled ? 1 : 0);
+
+  // Update animation when isEnabled changes
+  useEffect(() => {
+    Animated.spring(toggleAnim, {
+      toValue: isEnabled ? 1 : 0,
+      friction: 5.5,
+      tension: 300,
+      useNativeDriver: true,
+    }).start();
+  }, [isEnabled, toggleAnim]);
+
+  // Interpolate for toggle button position
+  const translateX = toggleAnim.interpolate({
+    inputRange: [0, 1],
+    outputRange: [3, 31],
+  });
+
+  // Interpolate for icon opacity
+  const barChartOpacity = toggleAnim.interpolate({
+    inputRange: [0, 1],
+    outputRange: [1, 0.4],
+  });
+
+  const areaChartOpacity = toggleAnim.interpolate({
+    inputRange: [0, 1],
+    outputRange: [0.4, 1],
+  });
+
   return (
     <TouchableOpacity
       activeOpacity={0.8}
@@ -24,32 +58,47 @@ const SwitchButton = ({
       <View
         style={[
           styles.toggleSlot,
-          isEnabled && styles.toggleSlotActive,
+          {
+            backgroundColor:
+              theme === "dark" ? colors.neutral800 : themeColors.navyBlue,
+          },
           disabled && styles.disabled,
         ]}
       >
         <View style={styles.sunIconWrapper}>
-          <AntDesign
-            name="barschart"
-            size={16}
-            color={colors.primary}
-            style={[styles.sunIcon, disabled && styles.disabledIcon]}
-          />
+          <Animated.View style={{ opacity: barChartOpacity }}>
+            <AntDesign
+              name="barschart"
+              size={16}
+              color={theme === "dark" ? colors.green : themeColors.white}
+              style={[styles.sunIcon, disabled && styles.disabledIcon]}
+            />
+          </Animated.View>
         </View>
-        <View
+        <Animated.View
           style={[
             styles.toggleButton,
-            isEnabled && styles.toggleButtonActive,
+            {
+              backgroundColor:
+                theme === "dark" ? colors.neutral200 : themeColors.white,
+              transform: [{ translateX }],
+            },
+            isEnabled && {
+              backgroundColor:
+                theme === "dark" ? colors.green : themeColors.veryLightBlue,
+            },
             disabled && styles.disabledButton,
           ]}
         />
         <View style={styles.moonIconWrapper}>
-          <AntDesign
-            name="areachart"
-            size={16}
-            color="white"
-            style={[styles.moonIcon, disabled && styles.disabledIcon]}
-          />
+          <Animated.View style={{ opacity: areaChartOpacity }}>
+            <AntDesign
+              name="areachart"
+              size={16}
+              color={theme === "dark" ? colors.green : themeColors.white}
+              style={[styles.moonIcon, disabled && styles.disabledIcon]}
+            />
+          </Animated.View>
         </View>
       </View>
     </TouchableOpacity>
@@ -66,46 +115,30 @@ const styles = StyleSheet.create({
     height: 28,
     width: 56,
     borderRadius: 28,
-    backgroundColor: colors.neutral700,
     justifyContent: "center",
-  },
-  toggleSlotActive: {
-    backgroundColor: colors.neutral800,
   },
   toggleButton: {
     position: "absolute",
-    left: 3,
     height: 22,
     width: 22,
     borderRadius: 22,
-    backgroundColor: colors.neutral200,
     shadowOpacity: 0.2,
     shadowRadius: 3,
     shadowOffset: { width: 0, height: 1 },
     elevation: 2,
   },
-  toggleButtonActive: {
-    backgroundColor: colors.primary,
-    transform: [{ translateX: 28 }],
-  },
   sunIconWrapper: {
     position: "absolute",
     left: 6,
-    opacity: 1,
     zIndex: 1,
   },
-  sunIcon: {
-    color: colors.primary,
-  },
+  sunIcon: {},
   moonIconWrapper: {
     position: "absolute",
     right: 6,
-    opacity: 0.5,
     zIndex: 1,
   },
-  moonIcon: {
-    color: colors.white,
-  },
+  moonIcon: {},
   disabled: {
     opacity: 0.5,
   },

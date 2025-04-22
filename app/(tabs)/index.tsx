@@ -10,7 +10,13 @@ import { signOut } from "firebase/auth";
 import { auth } from "@/config/firebase";
 import Button from "@/components/Button";
 import Typo from "@/components/typo";
-import { colors, spacingX, spacingY, radius } from "@/constants/theme";
+import {
+  colors,
+  getColors,
+  spacingX,
+  spacingY,
+  radius,
+} from "@/constants/theme";
 import { useAuth } from "@/contexts/authContext";
 import ScreenWrapper from "@/components/ScreenWrapper";
 import { verticalScale } from "@/utils/styling";
@@ -32,12 +38,15 @@ import { TransactionType, WalletType } from "@/types";
 import HighlightCard from "@/components/HighlightCard";
 import { firestore } from "@/config/firebase";
 import { useFocusEffect } from "@react-navigation/native";
+import { useTheme } from "@/contexts/themeContext";
 
 const Home = () => {
   const { user } = useAuth();
   const router = useRouter();
+  const { theme } = useTheme();
+  const themeColors = getColors(theme);
+
   const [selectedWalletId, setSelectedWalletId] = useState<string | null>(null);
-  const [showWalletSelector, setShowWalletSelector] = useState(false);
   const [financialHighlights, setFinancialHighlights] = useState({
     mostProfitableDay: { day: "Loading...", amount: 0 },
     mostExpensiveDay: { day: "Loading...", amount: 0 },
@@ -278,123 +287,155 @@ const Home = () => {
 
   return (
     <ScreenWrapper>
-      <View style={styles.container}>
-        {/* Header */}
+      <ScrollView
+        style={[styles.container, { backgroundColor: themeColors.background }]}
+        showsVerticalScrollIndicator={false}
+      >
+        {/*HELlO + SEARCH*/}
         <View style={styles.header}>
-          <View style={{ gap: 4 }}>
-            <Typo size={16} color={colors.neutral400}>
-              Hello
+          <View>
+            <Typo size={16} color={themeColors.textLight}>
+              Hello,
             </Typo>
-            <Typo size={20} fontWeight={"500"}>
-              {user?.name}
+            <Typo size={20} fontWeight={"600"} color={themeColors.text}>
+              {user?.name}!
             </Typo>
           </View>
-
-          <View style={styles.headerRight}>
-            <TouchableOpacity
-              onPress={() => setShowWalletSelector(!showWalletSelector)}
-              style={styles.walletSelector}
+          <TouchableOpacity
+            style={[
+              styles.searchBtn,
+              {
+                backgroundColor:
+                  theme === "dark"
+                    ? colors.neutral800
+                    : themeColors.veryLightBlue,
+              },
+            ]}
+            onPress={() => router.push("/(modals)/searchModal")}
+          >
+            <Icons.MagnifyingGlass
+              color={
+                theme === "dark"
+                  ? colors.neutral300
+                  : themeColors.navigationIcon
+              }
+            />
+            <Typo
+              size={14}
+              color={
+                theme === "dark" ? colors.neutral300 : themeColors.textLight
+              }
             >
-              <Icons.Wallet size={verticalScale(16)} color={colors.primary} />
-              <Typo size={12} color={colors.primary}>
-                {selectedWalletId
-                  ? wallets.find((w) => w.id === selectedWalletId)?.name ||
-                    "Loading..."
-                  : "All Wallets"}
-              </Typo>
-              <Icons.CaretDown
-                size={verticalScale(12)}
-                color={colors.primary}
-              />
-            </TouchableOpacity>
-
-            <TouchableOpacity
-              onPress={() => router.push("/(modals)/searchModal")}
-              style={styles.searchIcon}
-            >
-              <Icons.MagnifyingGlass
-                size={verticalScale(22)}
-                color={colors.neutral200}
-                weight="bold"
-              />
-            </TouchableOpacity>
-          </View>
+              Search
+            </Typo>
+          </TouchableOpacity>
         </View>
 
-        {/* Cüzdan Seçici Dropdown */}
-        {showWalletSelector && (
-          <View style={styles.walletDropdown}>
-            <TouchableOpacity
-              style={[
-                styles.walletOption,
-                !selectedWalletId && styles.selectedWalletOption,
-              ]}
-              onPress={() => {
-                setSelectedWalletId(null);
-                setShowWalletSelector(false);
-              }}
-            >
-              <Icons.Wallet size={verticalScale(16)} color={colors.white} />
-              <Typo size={14}>All Wallets</Typo>
-            </TouchableOpacity>
+        {/*HOME CARD*/}
+        <HomeCard
+          selectedWalletId={selectedWalletId}
+          setSelectedWalletId={setSelectedWalletId}
+        />
 
-            {wallets.map((wallet) => (
-              <TouchableOpacity
-                key={wallet.id}
-                style={[
-                  styles.walletOption,
-                  selectedWalletId === wallet.id && styles.selectedWalletOption,
-                ]}
-                onPress={() => {
-                  if (wallet.id) {
-                    setSelectedWalletId(wallet.id);
-                  }
-                  setShowWalletSelector(false);
-                }}
-              >
-                <Icons.Wallet size={verticalScale(16)} color={colors.white} />
-                <Typo size={14}>{wallet.name}</Typo>
-              </TouchableOpacity>
-            ))}
-          </View>
-        )}
-
+        {/*HIGHLIGHTS*/}
         <ScrollView
-          contentContainerStyle={styles.scrollViewStyle}
-          showsVerticalScrollIndicator={false}
+          horizontal
+          showsHorizontalScrollIndicator={false}
+          contentContainerStyle={styles.highlightsScrollView}
         >
-          {/* CARD */}
-          <View>
-            <HomeCard selectedWalletId={selectedWalletId} />
-          </View>
-
-          {/* HIGHLIGHT CARDS */}
           <HighlightCard
-            mostProfitableDay={financialHighlights.mostProfitableDay}
-            mostExpensiveDay={financialHighlights.mostExpensiveDay}
-            mostProfitableMonth={financialHighlights.mostProfitableMonth}
-            mostExpensiveMonth={financialHighlights.mostExpensiveMonth}
+            title={"Most profitable day"}
+            value={financialHighlights.mostProfitableDay.day}
+            amount={financialHighlights.mostProfitableDay.amount}
+            loading={highlightsLoading}
+            icon={
+              <Icons.TrendUp
+                size={24}
+                color={themeColors.white}
+                weight="fill"
+              />
+            }
+            bgColor={theme === "dark" ? colors.green : "#16a34a"}
           />
+          <HighlightCard
+            title={"Most expensive day"}
+            value={financialHighlights.mostExpensiveDay.day}
+            amount={financialHighlights.mostExpensiveDay.amount}
+            loading={highlightsLoading}
+            icon={
+              <Icons.TrendDown
+                size={24}
+                color={themeColors.white}
+                weight="fill"
+              />
+            }
+            bgColor={theme === "dark" ? colors.rose : "#ef4444"}
+          />
+          <HighlightCard
+            title={"Most profitable month"}
+            value={financialHighlights.mostProfitableMonth.month}
+            amount={financialHighlights.mostProfitableMonth.amount}
+            loading={highlightsLoading}
+            icon={
+              <Icons.CalendarCheck
+                size={24}
+                color={themeColors.white}
+                weight="fill"
+              />
+            }
+            bgColor={
+              theme === "dark" ? colors.primaryDark : themeColors.buttonBg
+            }
+          />
+          <HighlightCard
+            title={"Most expensive month"}
+            value={financialHighlights.mostExpensiveMonth.month}
+            amount={financialHighlights.mostExpensiveMonth.amount}
+            loading={highlightsLoading}
+            icon={
+              <Icons.Warning
+                size={24}
+                color={themeColors.white}
+                weight="fill"
+              />
+            }
+            bgColor={theme === "dark" ? "#f97316" : "#f97316"}
+          />
+        </ScrollView>
+
+        {/*RECENT TRANSACTIONS*/}
+        <View style={styles.recentTransactions}>
+          <View style={styles.highlightsHeader}>
+            <Typo size={18} fontWeight={"600"} color={themeColors.text}>
+              Recent Transactions
+            </Typo>
+          </View>
 
           <TransactionList
             data={recentTransactions}
             loading={TransactionsLoading}
-            emptyListMessage="No transactions added yet!"
-            title="Recent Transactions"
+            emptyListMessage={"No transactions yet!"}
           />
-        </ScrollView>
+        </View>
+      </ScrollView>
 
-        <Button
-          style={styles.floatingButton}
-          onPress={() => router.push("/(modals)/transactionModal")}
-        >
-          <Icons.Plus
-            color={colors.black}
-            size={verticalScale(24)}
-            weight="bold"
-          />
-        </Button>
-      </View>
+      {/* Floating Action Button for adding transactions */}
+      <TouchableOpacity
+        style={[
+          styles.fab,
+          {
+            backgroundColor:
+              theme === "dark" ? colors.primary : themeColors.addButtonBg,
+          },
+        ]}
+        onPress={() => router.push("/(modals)/transactionModal")}
+      >
+        <Icons.Plus
+          size={verticalScale(24)}
+          color={themeColors.white}
+          weight="bold"
+        />
+      </TouchableOpacity>
     </ScreenWrapper>
   );
 };
@@ -413,63 +454,47 @@ const styles = StyleSheet.create({
     alignItems: "center",
     marginBottom: spacingY._10,
   },
-  headerRight: {
+  searchBtn: {
     flexDirection: "row",
     alignItems: "center",
-    gap: spacingX._10,
-  },
-  searchIcon: {
-    backgroundColor: colors.neutral700,
     padding: spacingX._10,
     borderRadius: 50,
+    gap: spacingX._5,
   },
-  floatingButton: {
-    height: verticalScale(50),
-    width: verticalScale(50),
-    borderRadius: 100,
-    position: "absolute",
-    bottom: verticalScale(30),
-    right: verticalScale(30),
-  },
-  scrollViewStyle: {
+  highlights: {
     marginTop: spacingY._10,
     paddingBottom: verticalScale(100),
     gap: spacingY._25,
   },
-  walletSelector: {
+  highlightsHeader: {
     flexDirection: "row",
+    justifyContent: "space-between",
     alignItems: "center",
-    backgroundColor: colors.neutral800,
-    paddingHorizontal: spacingX._7,
-    paddingVertical: spacingY._5,
-    borderRadius: 50,
-    gap: spacingX._5,
+    marginBottom: spacingY._10,
   },
-  walletDropdown: {
-    position: "absolute",
-    top: verticalScale(75),
-    left: "auto",
-    right: spacingX._20,
-    zIndex: 10,
-    backgroundColor: colors.neutral800,
-    borderRadius: radius._12,
-    padding: spacingX._10,
-    width: "60%",
-    shadowColor: "#000",
-    shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.3,
-    shadowRadius: 4,
-    elevation: 8,
-  },
-  walletOption: {
-    flexDirection: "row",
-    alignItems: "center",
+  highlightsScrollView: {
     paddingVertical: spacingY._10,
-    paddingHorizontal: spacingX._7,
-    borderRadius: radius._10,
-    gap: spacingX._7,
+    paddingHorizontal: spacingX._5,
+    gap: spacingX._10,
   },
-  selectedWalletOption: {
-    backgroundColor: colors.neutral700,
+  recentTransactions: {
+    marginTop: spacingY._10,
+    paddingBottom: verticalScale(100),
+    gap: spacingY._25,
+  },
+  fab: {
+    position: "absolute",
+    bottom: verticalScale(20),
+    right: spacingX._20,
+    width: verticalScale(56),
+    height: verticalScale(56),
+    borderRadius: verticalScale(28),
+    justifyContent: "center",
+    alignItems: "center",
+    elevation: 5,
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.25,
+    shadowRadius: 3.84,
   },
 });

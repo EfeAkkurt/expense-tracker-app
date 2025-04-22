@@ -7,7 +7,12 @@ import {
   View,
 } from "react-native";
 import React, { useEffect, useState } from "react";
-import { colors, spacingX, spacingY } from "@/constants/theme";
+import {
+  colors as themeConstants,
+  getColors,
+  spacingX,
+  spacingY,
+} from "@/constants/theme";
 import { scale, verticalScale } from "@/utils/styling";
 import ScreenWrapper from "@/components/ScreenWrapper";
 import ModalWrapper from "@/components/ModalWrapper";
@@ -24,10 +29,13 @@ import { useAuth } from "@/contexts/authContext";
 import { updateUser } from "@/services/UserService";
 import { useRouter } from "expo-router";
 import * as ImagePicker from "expo-image-picker";
+import { useTheme } from "@/contexts/themeContext";
 
 const ProfileModal = () => {
   const { user, updateUserData } = useAuth();
   const router = useRouter();
+  const { theme } = useTheme();
+  const colors = getColors(theme);
 
   const [userData, setUserData] = useState<UserDataType>({
     name: "",
@@ -59,7 +67,7 @@ const ProfileModal = () => {
   const onsubmit = async () => {
     let { name, image } = userData;
     if (!name.trim()) {
-      Alert.alert("User", "Please fill all the fileds");
+      Alert.alert("User", "Please fill all the fields");
       return;
     }
 
@@ -76,46 +84,65 @@ const ProfileModal = () => {
   };
 
   return (
-    <ModalWrapper>
+    <ModalWrapper bg={colors.white}>
       <View style={styles.container}>
         <Header
           title="Update Profile"
-          leftIcon={<BackButton />}
+          leftIcon={
+            <BackButton
+              iconColor={theme === "dark" ? colors.white : colors.text}
+            />
+          }
           style={{ marginBottom: spacingY._10 }}
+          textColor={theme === "dark" ? colors.white : colors.text}
         />
         {/*FORM*/}
         <ScrollView contentContainerStyle={styles.form}>
           <View style={styles.avatarContainer}>
             <Image
-              style={styles.avatar}
+              style={[styles.avatar, { borderColor: colors.navyBlue }]}
               source={getProfileImage(userData.image)}
               contentFit="cover"
               transition={100}
             />
 
-            <TouchableOpacity onPress={onPickImage} style={styles.editIcon}>
-              <Icons.Pencil
-                size={verticalScale(20)}
-                color={colors.neutral800}
-              />
+            <TouchableOpacity
+              onPress={onPickImage}
+              style={[styles.editIcon, { backgroundColor: colors.white }]}
+            >
+              <Icons.Pencil size={verticalScale(20)} color={colors.navyBlue} />
             </TouchableOpacity>
           </View>
           <View style={styles.inputContainer}>
-            <Typo color={colors.neutral200}>Name</Typo>
+            <Typo color={theme === "dark" ? colors.white : colors.text}>
+              Name
+            </Typo>
             <Input
               placeholder="Name"
               value={userData.name}
               onChangeText={(value) => {
                 setUserData({ ...userData, name: value });
               }}
+              containerStyle={{
+                borderColor: colors.navyBlue,
+                backgroundColor:
+                  theme === "light" ? colors.white : colors.backgroundLight,
+              }}
+              inputStyle={{
+                color: theme === "dark" ? colors.white : colors.text,
+              }}
             />
           </View>
         </ScrollView>
       </View>
 
-      <View style={styles.footer}>
-        <Button onPress={onsubmit} loading={loading} style={{ flex: 1 }}>
-          <Typo color={colors.black} fontWeight={"700"}>
+      <View style={[styles.footer, { borderTopColor: colors.borderColor }]}>
+        <Button
+          onPress={onsubmit}
+          loading={loading}
+          style={{ flex: 1, backgroundColor: colors.navyBlue }}
+        >
+          <Typo color={colors.white} fontWeight={"700"}>
             Update
           </Typo>
         </Button>
@@ -139,7 +166,6 @@ const styles = StyleSheet.create({
     paddingHorizontal: spacingX._20,
     gap: scale(12),
     paddingTop: spacingY._15,
-    borderTopColor: colors.neutral700,
     marginBottom: spacingY._5,
     borderTopWidth: 1,
   },
@@ -157,15 +183,12 @@ const styles = StyleSheet.create({
     width: verticalScale(135),
     borderRadius: 200,
     borderWidth: 1,
-    borderColor: colors.neutral500,
   },
   editIcon: {
     position: "absolute",
     bottom: spacingY._5,
     right: spacingY._7,
     borderRadius: 100,
-    backgroundColor: colors.neutral100,
-    shadowColor: colors.black,
     shadowOffset: { width: 0, height: 0 },
     shadowOpacity: 0.25,
     shadowRadius: 10,

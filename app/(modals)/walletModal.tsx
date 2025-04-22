@@ -7,7 +7,7 @@ import {
   View,
 } from "react-native";
 import React, { useEffect, useState } from "react";
-import { colors, spacingX, spacingY } from "@/constants/theme";
+import { colors, getColors, spacingX, spacingY } from "@/constants/theme";
 import { scale, verticalScale } from "@/utils/styling";
 import ScreenWrapper from "@/components/ScreenWrapper";
 import ModalWrapper from "@/components/ModalWrapper";
@@ -26,10 +26,13 @@ import { useRouter, useLocalSearchParams } from "expo-router";
 import * as ImagePicker from "expo-image-picker";
 import ImageUpload from "@/components/ImageUpload";
 import { createOrUpdateWallet, deleteWallet } from "@/services/walletService";
+import { useTheme } from "@/contexts/themeContext";
 
 const WalletModal = () => {
   const { user, updateUserData } = useAuth();
   const router = useRouter();
+  const { theme } = useTheme();
+  const themeColors = getColors(theme);
 
   const [wallet, setWallet] = useState<WalletType>({
     name: "",
@@ -113,27 +116,45 @@ const WalletModal = () => {
   };
 
   return (
-    <ModalWrapper>
+    <ModalWrapper
+      bg={theme === "light" ? themeColors.white : themeColors.background}
+    >
       <View style={styles.container}>
         <Header
           title={oldWallet?.id ? "Edit Wallet" : "New Wallet"}
-          leftIcon={<BackButton />}
+          leftIcon={<BackButton iconColor={themeColors.text} />}
           style={{ marginBottom: spacingY._10 }}
+          textColor={themeColors.text}
         />
         {/*FORM*/}
         <ScrollView contentContainerStyle={styles.form}>
           <View style={styles.inputContainer}>
-            <Typo color={colors.neutral200}>Wallet Name</Typo>
+            <Typo
+              color={theme === "light" ? themeColors.navyBlue : colors.white}
+              fontWeight="600"
+            >
+              Wallet Name
+            </Typo>
             <Input
               placeholder="Salary"
               value={wallet.name}
+              containerStyle={{
+                borderColor:
+                  theme === "light" ? themeColors.navyBlue : colors.white,
+              }}
+              inputStyle={{ color: themeColors.text }}
               onChangeText={(value) => {
                 setWallet({ ...wallet, name: value });
               }}
             />
           </View>
           <View style={styles.inputContainer}>
-            <Typo color={colors.neutral200}>Wallet Icon</Typo>
+            <Typo
+              color={theme === "light" ? themeColors.navyBlue : colors.white}
+              fontWeight="600"
+            >
+              Wallet Icon
+            </Typo>
             {/*IMAGE INPUT*/}
             <ImageUpload
               file={wallet.image}
@@ -145,7 +166,9 @@ const WalletModal = () => {
         </ScrollView>
       </View>
 
-      <View style={styles.footer}>
+      <View
+        style={[styles.footer, { borderTopColor: themeColors.borderColor }]}
+      >
         {oldWallet?.id && !loading && (
           <Button
             onPress={showDeleteAlert}
@@ -156,14 +179,22 @@ const WalletModal = () => {
           >
             <Icons.Trash
               size={verticalScale(24)}
-              color={colors.white}
+              color={themeColors.white}
               weight="bold"
             />
           </Button>
         )}
 
-        <Button onPress={onsubmit} loading={loading} style={{ flex: 1 }}>
-          <Typo color={colors.black} fontWeight={"700"}>
+        <Button
+          onPress={onsubmit}
+          loading={loading}
+          style={{
+            flex: 1,
+            backgroundColor:
+              theme === "light" ? themeColors.navyBlue : colors.primary,
+          }}
+        >
+          <Typo color={themeColors.white} fontWeight={"700"}>
             {oldWallet?.id ? "Update Wallet" : "Add Wallet"}
           </Typo>
         </Button>
@@ -187,7 +218,6 @@ const styles = StyleSheet.create({
     paddingHorizontal: spacingX._20,
     gap: scale(12),
     paddingTop: spacingY._15,
-    borderTopColor: colors.neutral700,
     marginBottom: spacingY._5,
     borderTopWidth: 1,
   },
@@ -205,15 +235,12 @@ const styles = StyleSheet.create({
     width: verticalScale(135),
     borderRadius: 200,
     borderWidth: 1,
-    borderColor: colors.neutral500,
   },
   editIcon: {
     position: "absolute",
     bottom: spacingY._5,
     right: spacingY._7,
     borderRadius: 100,
-    backgroundColor: colors.neutral100,
-    shadowColor: colors.black,
     shadowOffset: { width: 0, height: 0 },
     shadowOpacity: 0.25,
     shadowRadius: 10,

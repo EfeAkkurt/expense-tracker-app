@@ -1,20 +1,38 @@
-import { ImageBackground, StyleSheet, Text, View } from "react-native";
-import React from "react";
+import {
+  ImageBackground,
+  StyleSheet,
+  Text,
+  View,
+  TouchableOpacity,
+  Modal,
+} from "react-native";
+import React, { useState } from "react";
 import Typo from "./typo";
 import { scale, verticalScale } from "@/utils/styling";
-import { colors, spacingX, spacingY } from "@/constants/theme";
+import {
+  colors,
+  getColors,
+  radius,
+  spacingX,
+  spacingY,
+} from "@/constants/theme";
 import * as Icons from "phosphor-react-native";
 import { orderBy, where } from "firebase/firestore";
 import useFetchData from "@/hooks/useFetchData";
 import { WalletType } from "@/types";
 import { useAuth } from "@/contexts/authContext";
+import { useTheme } from "@/contexts/themeContext";
 
 interface HomeCardProps {
-  selectedWalletId: string | null;
+  selectedWalletId?: string | null;
+  setSelectedWalletId?: React.Dispatch<React.SetStateAction<string | null>>;
 }
 
-const HomeCard = ({ selectedWalletId }: HomeCardProps) => {
+const HomeCard = ({ selectedWalletId, setSelectedWalletId }: HomeCardProps) => {
   const { user } = useAuth();
+  const { theme } = useTheme();
+  const themeColors = getColors(theme);
+  const [showWalletSelector, setShowWalletSelector] = useState(false);
 
   const {
     data: wallets,
@@ -72,11 +90,13 @@ const HomeCard = ({ selectedWalletId }: HomeCardProps) => {
                 "Selected Wallet"
               : "Total Balance"}
           </Typo>
-          <Icons.DotsThreeOutline
-            size={verticalScale(22)}
-            color={colors.black}
-            weight="fill"
-          />
+          <TouchableOpacity onPress={() => setShowWalletSelector(true)}>
+            <Icons.DotsThreeOutline
+              size={verticalScale(22)}
+              color={colors.black}
+              weight="fill"
+            />
+          </TouchableOpacity>
         </View>
         <Typo size={30} color={colors.black} fontWeight={"bold"}>
           ${walletLoading ? "----" : getTotals()?.Balance?.toFixed(2)}
@@ -99,7 +119,11 @@ const HomeCard = ({ selectedWalletId }: HomeCardProps) => {
               </Typo>
             </View>
             <View style={{ alignItems: "center" }}>
-              <Typo size={17} color={colors.green} fontWeight={"600"}>
+              <Typo
+                size={17}
+                color={theme === "dark" ? colors.green : "#16a34a"}
+                fontWeight={"600"}
+              >
                 ${walletLoading ? "----" : getTotals()?.Income?.toFixed(2)}
               </Typo>
             </View>
@@ -126,6 +150,75 @@ const HomeCard = ({ selectedWalletId }: HomeCardProps) => {
           </View>
         </View>
       </View>
+
+      {/* Wallet Selector Modal */}
+      <Modal
+        visible={showWalletSelector}
+        transparent={true}
+        animationType="fade"
+        onRequestClose={() => setShowWalletSelector(false)}
+      >
+        <TouchableOpacity
+          style={styles.modalOverlay}
+          activeOpacity={1}
+          onPress={() => setShowWalletSelector(false)}
+        >
+          <View
+            style={[
+              styles.walletDropdown,
+              {
+                backgroundColor:
+                  theme === "dark" ? colors.neutral800 : themeColors.navyBlue,
+              },
+            ]}
+          >
+            <TouchableOpacity
+              style={[
+                styles.walletOption,
+                !selectedWalletId && styles.selectedWalletOption,
+              ]}
+              onPress={() => {
+                if (setSelectedWalletId) {
+                  setSelectedWalletId(null);
+                }
+                setShowWalletSelector(false);
+              }}
+            >
+              <Icons.Wallet
+                size={verticalScale(16)}
+                color={themeColors.white}
+              />
+              <Typo size={14} color={themeColors.white}>
+                All Wallets
+              </Typo>
+            </TouchableOpacity>
+
+            {wallets?.map((wallet) => (
+              <TouchableOpacity
+                key={wallet.id}
+                style={[
+                  styles.walletOption,
+                  selectedWalletId === wallet.id && styles.selectedWalletOption,
+                ]}
+                onPress={() => {
+                  if (wallet.id && setSelectedWalletId) {
+                    setSelectedWalletId(wallet.id);
+                  }
+                  setShowWalletSelector(false);
+                }}
+              >
+                <Icons.Wallet
+                  size={verticalScale(16)}
+                  color={themeColors.white}
+                />
+                <Typo size={14} color={themeColors.white}>
+                  {wallet.name}
+                </Typo>
+              </TouchableOpacity>
+            ))}
+          </View>
+        </TouchableOpacity>
+      </Modal>
     </ImageBackground>
   );
 };
@@ -164,5 +257,32 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     alignItems: "center",
     gap: spacingY._7,
+  },
+  modalOverlay: {
+    flex: 1,
+    backgroundColor: "rgba(0, 0, 0, 0.5)",
+    justifyContent: "center",
+    alignItems: "center",
+  },
+  walletDropdown: {
+    borderRadius: radius._12,
+    padding: spacingX._10,
+    width: "80%",
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.3,
+    shadowRadius: 4,
+    elevation: 8,
+  },
+  walletOption: {
+    flexDirection: "row",
+    alignItems: "center",
+    paddingVertical: spacingY._7,
+    paddingHorizontal: spacingX._5,
+    borderRadius: radius._10,
+    gap: spacingX._7,
+  },
+  selectedWalletOption: {
+    backgroundColor: "rgba(255, 255, 255, 0.15)",
   },
 });

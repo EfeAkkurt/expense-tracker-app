@@ -1,24 +1,28 @@
-import {
-  ActivityIndicator,
-  ActivityIndicatorProps,
-  StyleSheet,
-  Text,
-  View,
-} from "react-native";
 import React from "react";
-import { colors } from "@/constants/theme";
+import { StyleSheet, View, ActivityIndicator } from "react-native";
+import { useTheme } from "@/contexts/themeContext";
+import { colors, getColors } from "@/constants/theme";
 
-const Loading = ({
-  size = "large",
-  color = colors.primary,
-}: ActivityIndicatorProps) => {
+const Loading = () => {
+  const { theme } = useTheme();
+  const themeColors = getColors(theme);
+
   return (
-    <View style={{ flex: 1, justifyContent: "center", alignItems: "center" }}>
-      <ActivityIndicator size={size} color={color} />
+    <View style={[styles.container, { backgroundColor: "transparent" }]}>
+      <ActivityIndicator
+        size="large"
+        color={theme === "light" ? themeColors.navyBlue : colors.primary}
+      />
     </View>
   );
 };
 
-export default Loading;
+const styles = StyleSheet.create({
+  container: {
+    flex: 1,
+    justifyContent: "center",
+    alignItems: "center",
+  },
+});
 
-const styles = StyleSheet.create({});
+export default Loading;

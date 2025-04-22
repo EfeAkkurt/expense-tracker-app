@@ -7,7 +7,7 @@ import {
   View,
 } from "react-native";
 import React, { useEffect, useState } from "react";
-import { colors, spacingX, spacingY } from "@/constants/theme";
+import { colors, getColors, spacingX, spacingY } from "@/constants/theme";
 import { scale, verticalScale } from "@/utils/styling";
 import ScreenWrapper from "@/components/ScreenWrapper";
 import ModalWrapper from "@/components/ModalWrapper";
@@ -30,12 +30,15 @@ import { where } from "firebase/firestore";
 import { orderBy } from "firebase/firestore";
 import useFetchData from "@/hooks/useFetchData";
 import TransactionList from "@/components/TransactionList";
+import { useTheme } from "@/contexts/themeContext";
 
 const SearchModal = () => {
   const { user, updateUserData } = useAuth();
   const router = useRouter();
   const [loading, setLoading] = useState(false);
   const [search, setSearch] = useState("");
+  const { theme } = useTheme();
+  const themeColors = getColors(theme);
 
   const constraints = [where("uid", "==", user?.uid), orderBy("date", "desc")];
 
@@ -59,12 +62,15 @@ const SearchModal = () => {
   });
 
   return (
-    <ModalWrapper style={{ backgroundColor: colors.neutral900 }}>
+    <ModalWrapper
+      bg={theme === "light" ? themeColors.white : themeColors.background}
+    >
       <View style={styles.container}>
         <Header
           title={"Search"}
-          leftIcon={<BackButton />}
+          leftIcon={<BackButton iconColor={themeColors.text} />}
           style={{ marginBottom: spacingY._10 }}
+          textColor={themeColors.text}
         />
         {/*FORM*/}
         <ScrollView contentContainerStyle={styles.form}>
@@ -72,8 +78,15 @@ const SearchModal = () => {
             <Input
               placeholder="Shoes..."
               value={search}
-              placeholderTextColor={colors.neutral400}
-              containerStyle={{ backgroundColor: colors.neutral800 }}
+              placeholderTextColor={themeColors.textLight}
+              containerStyle={{
+                backgroundColor:
+                  theme === "dark"
+                    ? themeColors.backgroundLight
+                    : themeColors.veryLightBlue,
+                borderColor: themeColors.borderColor,
+              }}
+              inputStyle={{ color: themeColors.text }}
               onChangeText={(value) => {
                 setSearch(value);
               }}
@@ -81,7 +94,6 @@ const SearchModal = () => {
           </View>
 
           {/*TRANSACTION LIST*/}
-
           <View>
             <TransactionList
               loading={TransactionsLoading}

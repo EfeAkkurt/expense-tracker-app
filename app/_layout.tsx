@@ -2,6 +2,7 @@ import { StyleSheet, Text, View } from "react-native";
 import React from "react";
 import { Stack } from "expo-router";
 import { AuthProvider } from "@/contexts/authContext";
+import { ThemeProvider } from "@/contexts/themeContext";
 
 const StackLayout = () => {
   return (
@@ -30,6 +31,12 @@ const StackLayout = () => {
           presentation: "modal",
         }}
       />
+      <Stack.Screen
+        name="(modals)/settingsModal"
+        options={{
+          presentation: "modal",
+        }}
+      />
     </Stack>
   );
 };
@@ -37,7 +44,9 @@ const StackLayout = () => {
 const RootLayout = () => {
   return (
     <AuthProvider>
-      <StackLayout />
+      <ThemeProvider>
+        <StackLayout />
+      </ThemeProvider>
     </AuthProvider>
   );
 };

@@ -61,11 +61,13 @@ export type HeaderProps = {
   style?: ViewStyle;
   leftIcon?: ReactNode;
   rightIcon?: ReactNode;
+  textColor?: string;
 };
 
 export type BackButtonProps = {
   style?: ViewStyle;
   iconSize?: number;
+  iconColor?: string;
 };
 
 export type TransactionType = {

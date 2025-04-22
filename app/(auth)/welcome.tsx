@@ -3,17 +3,17 @@ import React from "react";
 import ScreenWrapper from "@/components/ScreenWrapper";
 import Typo from "@/components/typo";
 import { verticalScale } from "@/utils/styling";
-import { colors, spacingX, spacingY } from "@/constants/theme";
+import { colors, getColors, spacingX, spacingY } from "@/constants/theme";
 import { Colors } from "react-native/Libraries/NewAppScreen";
 import Button from "@/components/Button";
 import Animated, { FadeIn, FadeInDown } from "react-native-reanimated";
 import { useRouter } from "expo-router";
+import { useTheme } from "@/contexts/themeContext";
 
 const Welcome = () => {
-  {
-    /* DIRECTOR */
-  }
   const router = useRouter();
+  const { theme } = useTheme();
+  const themeColors = getColors(theme);
 
   return (
     <ScreenWrapper>
@@ -24,7 +24,9 @@ const Welcome = () => {
             onPress={() => router.push("../login")}
             style={styles.loginButton}
           >
-            <Typo fontWeight={"500"}>Sign in</Typo>
+            <Typo fontWeight={"500"} color={themeColors.text}>
+              Sign in
+            </Typo>
           </TouchableOpacity>
 
           <Animated.Image
@@ -35,15 +37,28 @@ const Welcome = () => {
           />
 
           {/* Footer */}
-          <View style={styles.footer}>
+          <View
+            style={[
+              styles.footer,
+              { backgroundColor: themeColors.welcomeFooterBg },
+            ]}
+          >
             <Animated.View
               entering={FadeInDown.duration(2600).springify().damping(17)}
               style={{ alignItems: "center" }}
             >
-              <Typo size={30} fontWeight={"800"}>
+              <Typo
+                size={30}
+                fontWeight={"800"}
+                color={theme === "dark" ? themeColors.text : themeColors.text}
+              >
                 Always take control
               </Typo>
-              <Typo size={30} fontWeight={"800"}>
+              <Typo
+                size={30}
+                fontWeight={"800"}
+                color={theme === "dark" ? themeColors.text : themeColors.text}
+              >
                 of your finances
               </Typo>
             </Animated.View>
@@ -55,10 +70,10 @@ const Welcome = () => {
               .damping(17)}
             style={{ alignItems: "center", gap: 2 }}
           >
-            <Typo size={17} color={colors.textLight}>
+            <Typo size={17} color={themeColors.welcomeTextLight}>
               finances must be arranged to set a better
             </Typo>
-            <Typo size={17} color={colors.textLight}>
+            <Typo size={17} color={themeColors.welcomeTextLight}>
               lifestyle in future
             </Typo>
           </Animated.View>
@@ -71,8 +86,11 @@ const Welcome = () => {
               .damping(17)}
             style={styles.buttonContainer}
           >
-            <Button onPress={() => router.push("../register")}>
-              <Typo size={22} color={colors.neutral900} fontWeight={"600"}>
+            <Button
+              onPress={() => router.push("../register")}
+              style={{ backgroundColor: themeColors.welcomeStartBg }}
+            >
+              <Typo size={22} color={themeColors.white} fontWeight={"600"}>
                 Get Started
               </Typo>
             </Button>
@@ -95,7 +113,6 @@ const styles = StyleSheet.create({
     width: "100%",
     height: verticalScale(300),
     alignSelf: "center",
-
     marginTop: verticalScale(100),
   },
   loginButton: {
@@ -103,7 +120,6 @@ const styles = StyleSheet.create({
     marginRight: spacingX._20,
   },
   footer: {
-    backgroundColor: colors.neutral900,
     alignItems: "center",
     paddingTop: verticalScale(30),
     paddingBottom: verticalScale(45),
