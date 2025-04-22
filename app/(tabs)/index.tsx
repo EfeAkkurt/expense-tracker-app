@@ -21,6 +21,7 @@ import { useRouter } from "expo-router";
 import { orderBy, where, limit } from "firebase/firestore";
 import useFetchData from "@/hooks/useFetchData";
 import { TransactionType } from "@/types";
+import HighlightCard from "@/components/HighlightCard";
 
 const Home = () => {
   const { user } = useAuth();
@@ -70,6 +71,9 @@ const Home = () => {
           <View>
             <HomeCard />
           </View>
+
+          {/* HIGHLIGHT CARDS */}
+          <HighlightCard />
 
           <TransactionList
             data={recentTransactions}
