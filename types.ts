@@ -173,3 +173,30 @@ export type WalletType = {
   uid?: string;
   created?: Date;
 };
+
+export type GoalType = {
+  id?: string;
+  title: string;
+  targetAmount: number;
+  currentAmount?: number;
+  targetDate: Date | Timestamp | string;
+  description?: string;
+  image?: any;
+  completed?: boolean;
+  uid?: string;
+  walletId: string;
+  created?: Date | Timestamp;
+};
+
+export type GoalListType = {
+  data: GoalType[];
+  title?: string;
+  loading?: boolean;
+  emptyListMessage?: string;
+};
+
+export type GoalItemProps = {
+  item: GoalType;
+  index: number;
+  handleClick: Function;
+};

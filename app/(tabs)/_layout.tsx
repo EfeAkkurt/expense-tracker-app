@@ -61,6 +61,14 @@ const _layout = () => {
                 color={color}
               />
             );
+          } else if (route.name === "goals") {
+            return (
+              <Icons.Trophy
+                size={iconSize}
+                weight={focused ? "fill" : "regular"}
+                color={color}
+              />
+            );
           } else if (route.name === "profile") {
             return (
               <Icons.User
@@ -76,6 +84,7 @@ const _layout = () => {
       <Tabs.Screen name="index" />
       <Tabs.Screen name="statistics" />
       <Tabs.Screen name="wallet" />
+      <Tabs.Screen name="goals" />
       <Tabs.Screen name="profile" />
     </Tabs>
   );

@@ -531,7 +531,7 @@ const Statistics = () => {
                   yAxisThickness={0}
                   xAxisThickness={0}
                   hideRules
-                  spacing={activeIndex === 2 ? scale(30) : scale(35)}
+                  spacing={activeIndex === 2 ? scale(37) : scale(35)}
                   showDataPointOnFocus
                   showStripOnFocus
                   focusEnabled
